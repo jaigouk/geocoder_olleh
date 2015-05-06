@@ -138,8 +138,14 @@ class LookupTest < GeocoderTestCase
     assert_match "showpostal=1", g.query_url(Geocoder::Query.new("Madison Square Garden, New York, NY  10001, United States"))
   end
 
+  def test_olleh_api_key
+    Geocoder.configure(:api_key => ["OllehMapAPI0100", "bncT89dfRT"])
+    g = Geocoder::Lookup::Olleh.new
+    assert_match "T2xsZWhNYXBBUEkwMTAwOmJuY1Q4OWRmUlQ=", g.api_key
+  end
+
   def test_raises_configuration_error_on_missing_key
-    [:bing, :baidu].each do |l|
+    [:bing, :baidu, :olleh].each do |l|
       assert_raises Geocoder::ConfigurationError do
         Geocoder.configure(:lookup => l, :api_key => nil)
         Geocoder.search("Madison Square Garden, New York, NY  10001, United States")

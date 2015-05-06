@@ -41,6 +41,7 @@ module Geocoder
         :smarty_streets,
         :okf,
         :postcode_anywhere_uk,
+        :olleh,
         :test
       ]
     end

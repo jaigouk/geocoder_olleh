@@ -613,6 +613,16 @@ This uses the PostcodeAnywhere UK Geocode service, this will geocode any string 
 * **Limitations**: ?
 * **Notes**: To use PostcodeAnywhere you must include an API key: `Geocoder.configure(:lookup => :postcode_anywhere_uk, :api_key => 'your_api_key')`.
 
+#### Olleh (`:olleh`)
+
+* **API key**: required (set `Geocoder.configure(:api_key => [app_id, app_key])`)
+* **Quota**: Dependant on service plan
+* **Region**: South Korea
+* **SSL support**: no
+* **Languages**: Korean
+* **Documentation**: https://www.ollehmap.com/spacedata/
+* **Terms of Service**: https://www.ollehmap.com/spacedata/#이용약관
+* **Limitations**: Only for commercial use. For commercial usage please check https://www.ollehmap.com/guide/
 
 ### IP Address Services
 

@@ -282,6 +282,23 @@ module Geocoder
         "#{fixture_prefix}_romsey"
       end
     end
+
+    class Olleh
+      def make_api_request(query)
+        raise TimeoutError if query.text == "timeout"
+        raise SocketError if query.text == "socket_error"
+        raise Errno::ECONNREFUSED if query.text == "connection_refused"
+        if query.text == "invalid_json"
+          return MockHttpResponse.new(:body => 'invalid json', :code => 200)
+        end
+
+        read_fixture fixture_for_query(query)
+      end
+      private
+      def default_fixture_filename
+        "olleh_seoul"
+      end
+    end
   end
 end
 

@@ -10,7 +10,7 @@ group :development, :test do
   gem 'test-unit' # needed for Ruby >=2.2.0
 
   gem 'byebug', platforms: :mri
-
+  gem 'pry'
   platforms :jruby do
     gem 'jruby-openssl'
     gem 'jgeoip'
