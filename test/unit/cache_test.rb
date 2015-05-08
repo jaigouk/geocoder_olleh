@@ -22,7 +22,7 @@ class CacheTest < GeocoderTestCase
       set_api_key!(l)
       results = Geocoder.search("Madison Square Garden")
       assert !results.first.cache_hit,
-        "Lookup #{l} returned erroneously cached result."
+        "Lookup #{l} returned erroneously cached result."      
       results = Geocoder.search("Madison Square Garden")
       assert results.first.cache_hit,
         "Lookup #{l} did not return cached result."

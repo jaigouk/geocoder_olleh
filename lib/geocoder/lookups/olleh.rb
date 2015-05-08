@@ -94,28 +94,40 @@ module Geocoder::Lookup
     # Make an HTTP(S) request to a geocoding API and
     # return the response object.
     # https://github.com/augustl/net-http-cheat-sheet
-    def make_api_request(query)
-      timeout(configuration.timeout) do
-        uri = URI.parse(query_url(query))
-        Geocoder.log(:debug, "Geocoder: HTTP request being made for #{uri.to_s}")
-        http_client.start(uri.host, uri.port, use_ssl: use_ssl?) do |client|
-          req = Net::HTTP::Get.new(uri.request_uri, configuration.http_headers)
-          req["Authorization"] = "Basic #{token}"
-          client.request(req)
-        end
-      end
-    end
+    # def make_api_request(query)
+    #   raise TimeoutError if query.text == "timeout"
+    #     raise SocketError if query.text == "socket_error"
+    #     raise Errno::ECONNREFUSED if query.text == "connection_refused"
+    #     if query.text == "invalid_json"
+    #       return MockHttpResponse.new(:body => 'invalid json', :code => 200)
+    #     end
+
+    #   timeout(configuration.timeout) do
+    #     uri = URI.parse(query_url(query))
+    #     Geocoder.log(:debug, "Geocoder: HTTP request being made for #{uri.to_s}")
+    #     http_client.start(uri.host, uri.port, use_ssl: use_ssl?) do |client|
+    #       req = Net::HTTP::Get.new(uri.request_uri, configuration.http_headers)
+    #       req["Authorization"] = "Basic #{token}"
+    #       client.request(req)
+    #     end
+    #   end
+    # end
 
     private # ---------------------------------------------------------------
 
+    # results goes through structure and check returned hash.
     def results(query)
       return [] unless doc = fetch_data(query)
-      return [] unless doc['Response'] && doc['Response']['View']
-      if r=doc['Response']['View']
-        return [] if r.nil? || !r.is_a?(Array) || r.empty?
-        return r.first['Result']
+
+      if doc['statusCode'] == 200
+        return doc['resourceSets'].first['estimatedTotal'] > 0 ? doc['resourceSets'].first['resources'] : []
+      elsif doc['statusCode'] == 401 and doc["authenticationResultCode"] == "InvalidCredentials"
+        raise_error(Geocoder::InvalidApiKey) || Geocoder.log(:warn, "Invalid Bing API key.")
+      else
+        Geocoder.log(:warn, "Bing Geocoding API error: #{doc['statusCode']} (#{doc['statusDescription']}).")
       end
-      []
+      return []
+
     end
 
     # def query_url_params(query)

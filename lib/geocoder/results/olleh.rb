@@ -3,84 +3,46 @@ require 'geocoder/results/base'
 module Geocoder::Result
   class Olleh < Base
 
- def coordinates
-      @data['GeoObject']['Point']['pos'].split(' ').reverse.map(&:to_f)
-    end
-
     def address(format = :full)
-      @data['GeoObject']['metaDataProperty']['GeocoderMetaData']['text']
+      @data['address']['formattedAddress']
     end
 
     def city
-      if state.empty? and address_details and address_details.has_key? 'Locality'
-        address_details['Locality']['LocalityName']
-      elsif sub_state.empty? and address_details and address_details.has_key? 'AdministrativeArea' and
-          address_details['AdministrativeArea'].has_key? 'Locality'
-        address_details['AdministrativeArea']['Locality']['LocalityName']
-      elsif not sub_state_city.empty?
-        sub_state_city
-      else
-        ""
-      end
-    end
-
-    def country
-      address_details['CountryName']
-    end
-
-    def country_code
-      address_details['CountryNameCode']
-    end
-
-    def state
-      if address_details and address_details['AdministrativeArea']
-        address_details['AdministrativeArea']['AdministrativeAreaName']
-      else
-        ""
-      end
-    end
-
-    def sub_state
-      if !state.empty? and address_details and address_details['AdministrativeArea']['SubAdministrativeArea']
-        address_details['AdministrativeArea']['SubAdministrativeArea']['SubAdministrativeAreaName']
-      else
-        ""
-      end
+      @data['address']['locality']
     end
 
     def state_code
-      ""
+      @data['address']['adminDistrict']
     end
+
+    alias_method :state, :state_code
+
+    def country
+      @data['address']['countryRegion']
+    end
+
+    alias_method :country_code, :country
 
     def postal_code
-      ""
+      @data['address']['postalCode']
     end
 
-    def premise_name
-      address_details['Locality']['Premise']['PremiseName']
+    def coordinates
+      @data['point']['coordinates']
     end
 
-    def kind
-      @data['GeoObject']['metaDataProperty']['GeocoderMetaData']['kind']
+    def address_data
+      @data['address']
     end
 
-    def precision
-      @data['GeoObject']['metaDataProperty']['GeocoderMetaData']['precision']
+    def self.response_attributes
+      %w[bbox name confidence entityType]
     end
 
-    private # ----------------------------------------------------------------
-
-    def address_details
-      @data['GeoObject']['metaDataProperty']['GeocoderMetaData']['AddressDetails']['Country']
-    end
-
-    def sub_state_city
-      if !sub_state.empty? and address_details and address_details['AdministrativeArea']['SubAdministrativeArea'].has_key? 'Locality'
-        address_details['AdministrativeArea']['SubAdministrativeArea']['Locality']['LocalityName'] || ""
-      else
-        ""
+    response_attributes.each do |a|
+      define_method a do
+        @data[a]
       end
     end
-
   end
 end

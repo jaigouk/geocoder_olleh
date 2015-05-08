@@ -70,6 +70,10 @@ class ErrorHandlingTest < GeocoderTestCase
       next if l == :maxmind_local || l == :geoip2 # local, does not use cache
       lookup = Geocoder::Lookup.get(l)
       set_api_key!(l)
+      # if l == :olleh
+      #   require 'pry'
+      #   binding.pry
+      # end
       assert_raises Errno::ECONNREFUSED do
         lookup.send(:results, Geocoder::Query.new("connection_refused"))
       end
