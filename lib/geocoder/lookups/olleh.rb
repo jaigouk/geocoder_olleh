@@ -1,7 +1,8 @@
 require 'geocoder/lookups/base'
 require "geocoder/results/olleh"
 require 'base64'
-
+require 'uri'
+require 'json'
 module Geocoder::Lookup
   class Olleh < Base
 
@@ -57,13 +58,94 @@ module Geocoder::Lookup
       token
     end
 
+    def self.priority
+      PRIORITY
+    end
+
+    def self.addrcdtype
+      ADDR_CD_TYPES
+    end
+
+    def self.new_addr_types
+      NEW_ADDR_TYPES
+    end
+
+    def self.include_jibun
+      INCLUDE_JIBUN
+    end
+
+    def self.coord_types
+      COORD_TYPES
+    end
+
+
+    # need to be private. moved to public for testing
+    # ----------------------------------------------
+    def base_url(query)
+      case check_query_type(query)
+      when "route_search"
+        "https://openapi.kt.com/maps/etc/RouteSearch?params="
+      when "reverse_geocoding"
+        "https://openapi.kt.com/maps/geocode/GetAddrByGeocode?params="
+      else
+        "https://openapi.kt.com/maps/geocode/GetGeocodeByAddr?params="
+      end
+    end
+
+
+    def query_url_params(query)
+      case check_query_type(query)
+      when "route_search"
+        JSON.generate({
+          SX: query.options[:start_x],
+          SY: query.options[:start_y],
+          EX: query.options[:end_x],
+          EY: query.options[:end_y],
+          RPTYPE: "0",
+          COORDTYPE: Olleh.coord_types[query.options[:coord_type]],
+          PRIORITY: Olleh.priority[query.options[:priority]],
+          timestamp:  Util.now
+       })      
+      when "reverse_geocoding"
+        JSON.generate({
+          x: query.text.first,
+          y: query.text.last,
+          addrcdtype: Olleh.addrcdtype[query.options[:addrcdtype]],
+          newAddr: Olleh.new_addr_types[query.options[:new_addr_type]],
+          isJibun: Olleh.include_jibun[query.options[:include_jibun]],
+          timestamp: now
+       })
+      else
+        JSON.generate({
+          addr: URI.encode(query.sanitized_text),
+          addrcdtype: Olleh.addrcdtype[query.options[:addrcdtype]],
+          timestamp: now
+        })
+      end
+    end
+
+    def url_query_string(query)
+      URI.encode(
+        query_url_params(query)
+      ).gsub(':','%3A').gsub(',','%2C').gsub('https%3A', 'https:')
+    end  
+
+    def check_query_type(query)
+      if !query.options.blank? && query.options.include?(:priority)
+        "route_search"
+      elsif !query.options.blank? && query.options.include?(:include_jibun)
+        "reverse_geocoding"
+      else
+        "geocoding"
+      end
+    end
+
 
     private # ----------------------------------------------
 
     # results goes through structure and check returned hash.
     def results(query)
       doc = fetch_data(query)
-
       return [] unless doc
       if doc['statusCode'] == 200
         return doc['resourceSets'].first['estimatedTotal'] > 0 ? doc['resourceSets'].first['resources'] : []
@@ -75,32 +157,6 @@ module Geocoder::Lookup
       return doc
 
     end
-
-    def base_url(query)
-      if !query.options.blank? && query.options.include?(:priority)
-        "https://openapi.kt.com/maps/etc/RouteSearch?"
-      elsif !query.options.blank? && query.options.include?(:include_jibun)
-        "https://openapi.kt.com/maps/geocode/GetAddrByGeocode?"
-      else
-        "https://openapi.kt.com/maps/geocode/GetGeocodeByAddr?"
-      end
-    end
-
-
-    def query_url_params(query)
-      {
-        (query.reverse_geocode? ? :location : :address) => query.sanitized_text,
-        :ak => configuration.api_key,
-        :output => "json"
-      }.merge(super)
-    end
-
-    def url_query_string(query)
-      hash_to_query(
-        query_url_params(query).reject{ |key,value| value.nil? }
-      )
-    end    
-
 
     def token
       if a = configuration.api_key

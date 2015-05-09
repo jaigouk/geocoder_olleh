@@ -1,39 +1,9 @@
 {
-   "authenticationResultCode":"ValidCredentials",
-   "brandLogoUri":"http:\/\/ollehmap.com\/Branding\/logo_powered_by.png",
-   "resourceSets":[
-      {
-         "estimatedTotal":1,
-         "resources":[
-            {
-               "__type":"Location:http:\/\/schemas.ollehmap.com\/search\/local\/ws\/rest\/v1",
-               "bbox":[
-                  40.744944289326668,
-                  -74.002353921532631,
-                  40.755675807595253,
-                  -73.983625397086143
-               ],
-               "name":"Seoul, South Korea",
-               "point":{
-                  "type":"Point",
-                  "coordinates":[
-                     40.75031,
-                     -73.99299
-                  ]
-               },
-               "address":{
-                  "adminDistrict":"NY",
-                  "countryRegion":"United States",
-                  "formattedAddress":"Madison Square Garden, NY",
-                  "locality":"New York"
-               },
-               "confidence":"High",
-               "entityType":"Stadium"
-            }
-         ]
-      }
-   ],
-   "statusCode":200,
-   "statusDescription":"OK",
-   "traceId":"55094ee53c8d45e789794014666328cd|CH1M001466|02.00.82.2800|CH1MSNVM001396, CH1MSNVM001370, CH1MSNVM001397"
+  "sequenceno": "9999",
+  "errordescription": null,
+  "returncode": "1",
+  "transactionid": "95f1c4ea-b84d-3e42-bc4f-9882f6bfeec5",
+  "payload": "%7B%22RESDATA%22%3A%7B%22COUNT%22%3A1%2C%22ADDRS%22%3A%5B%7B%22DONG_CODE%22%3A%221168010500%22%2C%22ADDRESS%22%3A%22%EC%84%9C%EC%9A%B8%ED%8A%B9%EB%B3%84%EC%8B%9C+%EA%B0%95%EB%82%A8%EA%B5%AC+%EC%82%BC%EC%84%B1%EB%8F%99+168-1%22%2C%22Y%22%3A1945766%2C%22X%22%3A961376%7D%5D%7D%2C%22ID%22%3A%22501%22%2C%22ERRCD%22%3A0%2C%22NO%22%3A%2295f1c4ea-b84d-3e42-bc4f-9882f6bfeec5%22%2C%22ERRMS%22%3A%22SUCCESS%22%7D",
+  "errorcode": null,
+  "returndescription": "SUCCESS"
 }
