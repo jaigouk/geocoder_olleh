@@ -49,55 +49,16 @@ module Geocoder::Lookup
       ["app_id", "app_key"]
     end
 
-     # q = Geocoder::Query.new({ start_x: "952715", start_y: "1950203", end_x: "954643", end_y: "1951419", coord_type: 'wgs84', priority: 'shortest'})
-
-    # "https://openapi.kt.com/maps/gen=4&searchtext=%7B%3Astart_x%3D%3E%22952715%22%2C+%3Astart_y%3D%3E%221950203%22%2C+%3Aend_x%3D%3E%22954643%22%2C+%3Aend_y%3D%3E%221951419%22%2C+%3Acoord_type%3D%3E%22wgs84%22%2C+%3Apriority%3D%3E%22shortest%22%7D"
-    #
-    #
-    # TODO
-    # NEED TO CHANGE RESULT. IT WILL TRAVERSE DATA
-    #
-    # CHANGE URL BASED ON QUERY
-    #
-    # PARSE "shortest" and change it for olleh map
-
     def query_url(query)
       base_url(query) + url_query_string(query)
     end
-    
-
-    # )> Geocoder::Query.new("4.1.0.2", {street_address: true}).options
-    # => {:street_address=>true}
-
-
 
     def api_key
       token
     end
-    ##
-    # Make an HTTP(S) request to a geocoding API and
-    # return the response object.
-    # https://github.com/augustl/net-http-cheat-sheet
-    # def make_api_request(query)
-    #   raise TimeoutError if query.text == "timeout"
-    #     raise SocketError if query.text == "socket_error"
-    #     raise Errno::ECONNREFUSED if query.text == "connection_refused"
-    #     if query.text == "invalid_json"
-    #       return MockHttpResponse.new(:body => 'invalid json', :code => 200)
-    #     end
 
-    #   timeout(configuration.timeout) do
-    #     uri = URI.parse(query_url(query))
-    #     Geocoder.log(:debug, "Geocoder: HTTP request being made for #{uri.to_s}")
-    #     http_client.start(uri.host, uri.port, use_ssl: use_ssl?) do |client|
-    #       req = Net::HTTP::Get.new(uri.request_uri, configuration.http_headers)
-    #       req["Authorization"] = "Basic #{token}"
-    #       client.request(req)
-    #     end
-    #   end
-    # end
 
-    private # ---------------------------------------------------------------
+    private # ----------------------------------------------
 
     # results goes through structure and check returned hash.
     def results(query)
