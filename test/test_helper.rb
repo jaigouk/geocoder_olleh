@@ -139,6 +139,17 @@ module Geocoder
       def fixture_prefix
         "olleh"
       end    
+      remove_method(:make_api_request)
+
+      def make_api_request(query)        
+        return raise TimeoutError if query.text == "timeout"
+        return raise SocketError if query.text == "socket_error"
+        return raise Errno::ECONNREFUSED if query.text == "connection_refused"
+        if query.text == "invalid_json"
+          return MockHttpResponse.new(:body => 'invalid json', :code => 200)
+        end
+        read_fixture fixture_for_query(query)
+      end
     end
 
 

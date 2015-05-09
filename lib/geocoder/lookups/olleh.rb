@@ -77,7 +77,37 @@ module Geocoder::Lookup
     def self.coord_types
       COORD_TYPES
     end
+    
 
+
+    private # ----------------------------------------------
+
+    # results goes through structure and check returned hash.
+    def results(query)
+      doc = fetch_data(query)
+      return [] unless doc
+      if doc['statusCode'] == 200
+        return doc['resourceSets'].first['estimatedTotal'] > 0 ? doc['resourceSets'].first['resources'] : []
+      elsif doc['statusCode'] == 401 and doc["authenticationResultCode"] == "InvalidCredentials"
+        raise_error(Geocoder::InvalidApiKey) || Geocoder.log(:warn, "Invalid Bing API key.")
+      else
+        Geocoder.log(:warn, "Bing Geocoding API error: #{doc['statusCode']} (#{doc['statusDescription']}).")
+      end
+      return doc
+
+    end
+
+    def token
+      if a = configuration.api_key
+        if a.is_a?(Array)
+          return  Base64.encode64("#{a.first}:#{a.last}").strip
+        end
+      end
+    end
+
+    def now
+      Time.now.strftime("%Y%m%d%H%M%S%L")
+    end
 
     # need to be private. moved to public for testing
     # ----------------------------------------------
@@ -140,34 +170,21 @@ module Geocoder::Lookup
       end
     end
 
-
-    private # ----------------------------------------------
-
-    # results goes through structure and check returned hash.
-    def results(query)
-      doc = fetch_data(query)
-      return [] unless doc
-      if doc['statusCode'] == 200
-        return doc['resourceSets'].first['estimatedTotal'] > 0 ? doc['resourceSets'].first['resources'] : []
-      elsif doc['statusCode'] == 401 and doc["authenticationResultCode"] == "InvalidCredentials"
-        raise_error(Geocoder::InvalidApiKey) || Geocoder.log(:warn, "Invalid Bing API key.")
-      else
-        Geocoder.log(:warn, "Bing Geocoding API error: #{doc['statusCode']} (#{doc['statusDescription']}).")
-      end
-      return doc
-
-    end
-
-    def token
-      if a = configuration.api_key
-        if a.is_a?(Array)
-          return  Base64.encode64("#{a.first}:#{a.last}").strip
+    def make_api_request(query)
+      timeout(configuration.timeout) do
+        uri = URI.parse(query_url(query))
+        Geocoder.log(:debug, "Geocoder: HTTP request being made for #{uri.to_s}")
+        http_client.start(uri.host, uri.port, use_ssl: use_ssl?) do |client|
+          req = Net::HTTP::Get.new(uri.request_uri, configuration.http_headers)
+          if configuration.basic_auth[:user] and configuration.basic_auth[:password]
+            req.basic_auth(
+              configuration.basic_auth[:user],
+              configuration.basic_auth[:password]
+            )
+          end
+          client.request(req)
         end
       end
-    end
-
-    def now
-      Time.now.strftime("%Y%m%d%H%M%S%L")
     end
 
   end
