@@ -1,6 +1,7 @@
 require 'geocoder/lookups/base'
 require "geocoder/results/olleh"
 require 'base64'
+
 module Geocoder::Lookup
   class Olleh < Base
 
@@ -44,10 +45,6 @@ module Geocoder::Lookup
       "Olleh"
     end
 
-    def protocol
-      "https"
-    end
-
     def required_api_key_parts
       ["app_id", "app_key"]
     end
@@ -63,28 +60,15 @@ module Geocoder::Lookup
     # CHANGE URL BASED ON QUERY
     #
     # PARSE "shortest" and change it for olleh map
-    def url_query_string(query)
-      hash_to_query(
-        query_url_params(query).reject{ |key,value| value.nil? }
-      )
-    end
 
     def query_url(query)
       base_url(query) + url_query_string(query)
     end
+    
 
     # )> Geocoder::Query.new("4.1.0.2", {street_address: true}).options
     # => {:street_address=>true}
 
-    def base_url(query)
-      if !query.options.blank? && query.options.include?(:priority)
-        "https://openapi.kt.com/maps/etc/RouteSearch?"
-      elsif !query.options.blank? && query.options.include?(:include_jibun)
-        "https://openapi.kt.com/maps/geocode/GetAddrByGeocode?"
-      else
-        "https://openapi.kt.com/maps/geocode/GetGeocodeByAddr?"
-      end
-    end
 
 
     def api_key
@@ -117,8 +101,9 @@ module Geocoder::Lookup
 
     # results goes through structure and check returned hash.
     def results(query)
-      return [] unless doc = fetch_data(query)
+      doc = fetch_data(query)
 
+      return [] unless doc
       if doc['statusCode'] == 200
         return doc['resourceSets'].first['estimatedTotal'] > 0 ? doc['resourceSets'].first['resources'] : []
       elsif doc['statusCode'] == 401 and doc["authenticationResultCode"] == "InvalidCredentials"
@@ -126,23 +111,35 @@ module Geocoder::Lookup
       else
         Geocoder.log(:warn, "Bing Geocoding API error: #{doc['statusCode']} (#{doc['statusDescription']}).")
       end
-      return []
+      return doc
 
     end
 
-    # def query_url_params(query)
+    def base_url(query)
+      if !query.options.blank? && query.options.include?(:priority)
+        "https://openapi.kt.com/maps/etc/RouteSearch?"
+      elsif !query.options.blank? && query.options.include?(:include_jibun)
+        "https://openapi.kt.com/maps/geocode/GetAddrByGeocode?"
+      else
+        "https://openapi.kt.com/maps/geocode/GetGeocodeByAddr?"
+      end
+    end
 
-    #   if query.reverse_geocode?
-    #     super.merge(options).merge(
-    #       :prox=>query.sanitized_text,
-    #       :mode=>:retrieveAddresses
-    #     )
-    #   else
-    #     super.merge(options).merge(
-    #       :searchtext=>query.sanitized_text
-    #     )
-    #   end
-    # end
+
+    def query_url_params(query)
+      {
+        (query.reverse_geocode? ? :location : :address) => query.sanitized_text,
+        :ak => configuration.api_key,
+        :output => "json"
+      }.merge(super)
+    end
+
+    def url_query_string(query)
+      hash_to_query(
+        query_url_params(query).reject{ |key,value| value.nil? }
+      )
+    end    
+
 
     def token
       if a = configuration.api_key

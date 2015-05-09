@@ -42,6 +42,7 @@ class LookupTest < GeocoderTestCase
     :google => :language,
     :google_premier => :language,
     :mapquest => :key,
+    :olleh => :key,
     :maxmind => :l,
     :nominatim => :"accept-language",
     :yahoo => :locale,

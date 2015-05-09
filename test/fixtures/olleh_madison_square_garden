@@ -1,20 +1,19 @@
 {
    "authenticationResultCode":"ValidCredentials",
-   "brandLogoUri":"http:\/\/dev.virtualearth.net\/Branding\/logo_powered_by.png",
-   "copyright":"Copyright © 2011 Microsoft and its suppliers. All rights reserved. This API cannot be accessed and the content and any results may not be used, reproduced or transmitted in any manner without express written permission from Microsoft Corporation.",
+   "brandLogoUri":"http:\/\/dev.virtualearth.net\/Branding\/logo_powered_by.png",   
    "resourceSets":[
       {
          "estimatedTotal":1,
          "resources":[
             {
-               "__type":"Location:http:\/\/schemas.microsoft.com\/search\/local\/ws\/rest\/v1",
+               "__type":"Location:http:\/\/api.ollehmap.com\/testing_jaigouk\/local\/ws\/rest\/v1",
                "bbox":[
                   40.744944289326668,
                   -74.002353921532631,
                   40.755675807595253,
                   -73.983625397086143
                ],
-               "name":"Madison Square Garden, NY",
+               "name":"Seoul, South Korea",
                "point":{
                   "type":"Point",
                   "coordinates":[
@@ -26,6 +25,7 @@
                   "adminDistrict":"NY",
                   "countryRegion":"United States",
                   "formattedAddress":"Madison Square Garden, NY",
+                  "postalCode": "10001",
                   "locality":"New York"
                },
                "confidence":"High",

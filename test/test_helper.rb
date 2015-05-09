@@ -93,7 +93,7 @@ module Geocoder
     class Base
       private
 
-      def fixture_exists?(filename)
+      def fixture_exists?(filename)     
         File.exist?(File.join("test", "fixtures", filename))
       end
 
@@ -114,7 +114,7 @@ module Geocoder
         handle
       end
 
-      def fixture_for_query(query)
+      def fixture_for_query(query)        
         label = query.reverse_geocode? ? "reverse" : query.text.gsub(/[ \.]/, "_")
         filename = "#{fixture_prefix}_#{label}"
         fixture_exists?(filename) ? filename : default_fixture_filename
@@ -122,16 +122,25 @@ module Geocoder
 
       remove_method(:make_api_request)
 
-      def make_api_request(query)
-        raise TimeoutError if query.text == "timeout"
-        raise SocketError if query.text == "socket_error"
-        raise Errno::ECONNREFUSED if query.text == "connection_refused"
+      def make_api_request(query)        
+        return raise TimeoutError if query.text == "timeout"
+        return raise SocketError if query.text == "socket_error"
+        return raise Errno::ECONNREFUSED if query.text == "connection_refused"
         if query.text == "invalid_json"
           return MockHttpResponse.new(:body => 'invalid json', :code => 200)
         end
         read_fixture fixture_for_query(query)
       end
     end
+
+
+    class Olleh
+      private
+      def fixture_prefix
+        "olleh"
+      end    
+    end
+
 
     class Bing
       private
@@ -283,40 +292,7 @@ module Geocoder
       end
     end
 
-    class Olleh
-      private
-      def default_fixture_filename
-        "olleh_seoul"
-      end
-      # remove_method(:make_api_request)
-
-      # remove_method(:results)
-
-      # def results(query)
-      #   raise TimeoutError if query.to_s == "timeout"
-      #   raise SocketError if query.to_s == "socket_error"
-      #   raise Errno::ECONNREFUSED if query.to_s == "connection_refused"
-
-      #   return [] if query.to_s == 'no results'
-      #   return [] if query.to_s == '127.0.0.1'
-      #   [{'city'=>{'names'=>{'en'=>'Mountain View'}},'country'=>{'iso_code'=>'US','names'=>
-      #   {'en'=>'United States'}},'location'=>{'latitude'=>37.41919999999999,
-      #   'longitude'=>-122.0574},'postal'=>{'code'=>'94043'},'subdivisions'=>[{
-      #   'iso_code'=>'CA','names'=>{'en'=>'California'}}]}]
-      # end
-
-      # def make_api_request(query)
-      #   raise TimeoutError if query.text == "timeout"
-      #   raise SocketError if query.text == "socket_error"
-      #   raise Errno::ECONNREFUSED if query.text == "connection_refused"
-      #   if query.text == "invalid_json"
-      #     return MockHttpResponse.new(:body => 'invalid json', :code => 200)
-      #   end
-
-      #   read_fixture fixture_for_query(query)
-      # end
-
-    end
+    
   end
 end
 

@@ -40,8 +40,8 @@ module Geocoder
         :geocodio,
         :smarty_streets,
         :okf,
-        :postcode_anywhere_uk,
-        :olleh,
+        :postcode_anywhere_uk,        
+        :olleh,        
         :test
       ]
     end
