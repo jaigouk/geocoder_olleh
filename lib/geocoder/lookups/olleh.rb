@@ -7,15 +7,15 @@ module Geocoder::Lookup
   class Olleh < Base
 
     PRIORITY = {
-      'shortest' => 0,
-      'high_way' => 1,
-      'free_way' => 2,
-      'optimal'  => 3
+      'shortest' => 0, # 최단거리 
+      'high_way' => 1, # 고속도로 포함 
+      'free_way' => 2, # 
+      'optimal'  => 3  # 최적거리
     }
 
     ADDR_CD_TYPES = {
-      'law'            => 0,
-      'administration' => 1,
+      'law'            => 0, # 법정동 
+      'administration' => 1, # 행정동
       'law_and_admin'  => 2,
       'road'           => 3
     }
@@ -117,13 +117,14 @@ module Geocoder::Lookup
     def results(query)
       data = fetch_data(query)
       return [] unless data
+
       doc = JSON.parse(URI.decode(data["payload"]))
-      if doc['ERRCD'] == 0
+      if doc['ERRCD'] == 0 # NO ERROR
+        return [] if doc['RESDATA']['COUNT'] == 0
         return doc['RESDATA']["ADDRS"]
       else
         Geocoder.log(:warn, "Olleh API error: #{doc['ERRCD']} (#{doc['ERRMS'].gsub('+', ' ')}).")
-      end
-      return doc['RESDATA']["ADDRS"]
+      end      
     end
 
     def token
@@ -167,9 +168,9 @@ module Geocoder::Lookup
         JSON.generate({
           x: query.text.first,
           y: query.text.last,
-          addrcdtype: Olleh.addrcdtype[query.options[:addrcdtype]],
-          newAddr: Olleh.new_addr_types[query.options[:new_addr_type]],
-          isJibun: Olleh.include_jibun[query.options[:include_jibun]],
+          addrcdtype: Olleh.addrcdtype[query.options[:addrcdtype]] || 0,
+          newAddr: Olleh.new_addr_types[query.options[:new_addr_type]] || 0,
+          isJibun: Olleh.include_jibun[query.options[:include_jibun]] || 0,
           timestamp: now
        })
       else # geocoding

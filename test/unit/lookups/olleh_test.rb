@@ -30,18 +30,44 @@ class OllehTest < GeocoderTestCase
   end
 
   def test_gecode_with_options
-    query = Geocoder::Query.new("서울특별시 강남구 삼성동 168-1",{:addrcdtype => 'law'})
+    query = Geocoder::Query.new("삼성동",{:addrcdtype => 'law'})
     lookup = Geocoder::Lookup::Olleh.new
     url_with_params = lookup.query_url(query)
     assert url_with_params.include? "%22addrcdtype%22%3A0%2C%22"
-    # require 'pry'
-    # binding.pry
-    # lookup.public_make_api_request(query)
-
   end
 
   def test_check_query_type
-    
+    query = Geocoder::Query.new("삼성동",{:addrcdtype => 'law'})
+    lookup = Geocoder::Lookup::Olleh.new
+    assert lookup.search(query).count == 2
+  end
+
+  def test_olleh_result_components
+    query = Geocoder::Query.new("삼성동",{:addrcdtype => 'law'})
+
+    lookup = Geocoder::Lookup::Olleh.new
+    result = lookup.search(query).first
+    assert result.address == "서울특별시 강남구 삼성동"
+    assert result.country == "South Korea"
+    assert result.city == "서울특별시"
+    assert result.gu == "강남구"
+    assert result.dong == "삼성동"
+    assert result.dong_code == "1168010500"
+    assert result.coordinates == [960713, 1946274]
+  end
+
+  
+  def test_olleh_geocoding_no_result
+    query = Geocoder::Query.new("no results",{:addrcdtype => 'law'})
+    lookup = Geocoder::Lookup::Olleh.new
+    assert lookup.search(query) == []
+  end
+
+  def test_olleh_reverse_geocoding
+    query = Geocoder::Query.new([960713, 1946274],{addrcdtype: 'law', newAddr: 'new', isJibun: 'yes'})
+    lookup = Geocoder::Lookup::Olleh.new
+    result = lookup.search(query).first
+    assert result.address == "서울특별시 강남구 삼성동 74-14"
   end
 
   # def test_google_result_components

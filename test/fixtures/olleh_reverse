@@ -1,42 +1,9 @@
 {
-   "authenticationResultCode":"ValidCredentials",
-   "brandLogoUri":"http:\/\/dev.virtualearth.net\/Branding\/logo_powered_by.png",
-   "copyright":"Copyright © 2011 Microsoft and its suppliers. All rights reserved. This API cannot be accessed and the content and any results may not be used, reproduced or transmitted in any manner without express written permission from Microsoft Corporation.",
-   "resourceSets":[
-      {
-         "estimatedTotal":1,
-         "resources":[
-            {
-               "__type":"Location:http:\/\/schemas.microsoft.com\/search\/local\/ws\/rest\/v1",
-               "bbox":[
-                  45.419835111675845,
-                  -75.683656128790716,
-                  45.4275605468172,
-                  -75.66898098334994
-               ],
-               "name":"291 Rue Somerset E, Ottawa, ON, K1N",
-               "point":{
-                  "type":"Point",
-                  "coordinates":[
-                     45.423697829246521,
-                     -75.676318556070328
-                  ]
-               },
-               "address":{
-                  "addressLine":"291 Rue Somerset E",
-                  "adminDistrict":"ON",
-                  "countryRegion":"Canada",
-                  "formattedAddress":"291 Rue Somerset E, Ottawa, ON, K1N",
-                  "locality":"Ottawa",
-                  "postalCode":"K1N"
-               },
-               "confidence":"Medium",
-               "entityType":"Address"
-            }
-         ]
-      }
-   ],
-   "statusCode":200,
-   "statusDescription":"OK",
-   "traceId":"27bd5ed659e64ba6970c4144f1d4ea94|CH1M001470|02.00.82.2800|CH1MSNVM001396, CH1MSNVM001374"
+  "sequenceno": "9999",
+  "errordescription": null,
+  "returncode": "1",
+  "transactionid": "d330356d-b480-318b-a60f-8f322a1b2b73",
+  "payload": "%7B%22RESDATA%22%3A%7B%22COUNT%22%3A1%2C%22ADDRS%22%3A%5B%7B%22DONG_CODE%22%3A%221168010500%22%2C%22ADDRESS%22%3A%22%EC%84%9C%EC%9A%B8%ED%8A%B9%EB%B3%84%EC%8B%9C+%EA%B0%95%EB%82%A8%EA%B5%AC+%EC%82%BC%EC%84%B1%EB%8F%99+74-14%22%2C%22Y%22%3A1946327%2C%22X%22%3A960716%7D%5D%7D%2C%22ID%22%3A%22502%22%2C%22ERRCD%22%3A0%2C%22NO%22%3A%22d330356d-b480-318b-a60f-8f322a1b2b73%22%2C%22ERRMS%22%3A%22SUCCESS%22%7D",
+  "errorcode": null,
+  "returndescription": "SUCCESS"
 }

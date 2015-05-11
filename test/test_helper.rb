@@ -153,7 +153,9 @@ module Geocoder
         end
         if query.text.include? "삼성동"
           read_fixture "olleh_seoul"
-        else        
+        elsif query.text.include? "960713"
+          read_fixture "olleh_reverse"
+        else
           read_fixture fixture_for_query(query)
         end
       end
