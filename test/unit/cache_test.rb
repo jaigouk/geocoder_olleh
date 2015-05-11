@@ -14,15 +14,19 @@ class CacheTest < GeocoderTestCase
     @tempfile.close
   end
 
-  def test_second_occurrence_of_request_is_cache_hit
-    Geocoder.configure(:cache => {})
+  def test_second_occurrence_of_request_is_cache_hit    
     Geocoder::Lookup.all_services_except_test.each do |l|
+      Geocoder.configure(:cache => {})
       next if l == :maxmind_local || l == :geoip2 # local, does not use cache
       Geocoder.configure(:lookup => l)
       set_api_key!(l)
       results = Geocoder.search("Madison Square Garden")
       assert !results.first.cache_hit,
         "Lookup #{l} returned erroneously cached result."      
+      # if l == :olleh
+      #   require 'pry'
+      #   binding.pry
+      # end
       results = Geocoder.search("Madison Square Garden")
       assert results.first.cache_hit,
         "Lookup #{l} did not return cached result."
@@ -56,4 +60,5 @@ class CacheTest < GeocoderTestCase
     Geocoder.search("service unavailable")
     assert_false lookup.instance_variable_get(:@cache_hit)
   end
+
 end

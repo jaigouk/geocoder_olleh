@@ -43,7 +43,7 @@ module Geocoder
       # for reverse geocoding. Returns an array of <tt>Geocoder::Result</tt>s.
       #
       def search(query, options = {})
-        query = Geocoder::Query.new(query, options) unless query.is_a?(Geocoder::Query)
+        query = Geocoder::Query.new(query, options) unless query.is_a?(Geocoder::Query)        
         results(query).map{ |r|
           result = result_class.new(r)
           result.cache_hit = @cache_hit if cache
@@ -80,6 +80,10 @@ module Geocoder
       # The working Cache object.
       #
       def cache
+        # if handle == :olleh
+        # require 'pry'
+        # binding.pry
+      # end
         if @cache.nil? and store = configuration.cache
           @cache = Cache.new(store, configuration.cache_prefix)
         end

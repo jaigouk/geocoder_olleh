@@ -4,8 +4,17 @@ require 'test_helper'
 class OllehTest < GeocoderTestCase
 
   def setup
-    Geocoder.configure(lookup: :olleh)
-    set_api_key!(:olleh)
+    Geocoder.configure(lookup: :olleh, :api_key => ["OllehMapAPI0100", "bncT89dfRT"])
+  end
+
+  def test_olleh_api_key
+    g = Geocoder::Lookup::Olleh.new
+    assert_match "T2xsZWhNYXBBUEkwMTAwOmJuY1Q4OWRmUlQ=", g.auth_key
+  end
+
+  def test_request_header_for_geocode
+    lookup = Geocoder::Lookup::Olleh.new    
+    assert Geocoder.config.http_headers[:Authorization] == "Basic T2xsZWhNYXBBUEkwMTAwOmJuY1Q4OWRmUlQ="
   end
 
   def test_query_for_geocode
@@ -20,9 +29,15 @@ class OllehTest < GeocoderTestCase
     assert url.include?("addrcdtype%22%3A0%2C"), "Invalide address parsing"
   end
 
-  # def test_request_header_for_geocode
-  #   lookup = Geocoder::Lookup::Olleh.new
-  # end
+  def test_cached
+    query = Geocoder::Query.new("서울특별시 강남구 삼성동 168-1")
+    # require 'pry'
+    # binding.pry
+  end
+
+  def test_check_query_type
+    
+  end
 
   # def test_google_result_components
   #   result = Geocoder.search("Madison Square Garden, New York, NY").first

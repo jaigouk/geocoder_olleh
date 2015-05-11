@@ -42,6 +42,13 @@ module Geocoder::Lookup
       'bessel'  => 8
     }
 
+    def initialize
+      super
+      Geocoder.configure(
+        :http_headers => {:Authorization => "Basic #{token}"}
+      )
+    end
+
     def name
       "Olleh"
     end
@@ -52,10 +59,6 @@ module Geocoder::Lookup
 
     def query_url(query)
       base_url(query) + url_query_string(query)
-    end
-
-    def api_key
-      token
     end
 
     def self.priority
@@ -78,7 +81,22 @@ module Geocoder::Lookup
       COORD_TYPES
     end
     
+    def auth_key
+      token
+    end
 
+
+ def make_api_request(query)
+      timeout(configuration.timeout) do
+        uri = URI.parse(query_url(query))
+        Geocoder.log(:debug, "Geocoder: HTTP request being made for #{uri.to_s}")
+        http_client.start(uri.host, uri.port, use_ssl: use_ssl?) do |client|
+          req = Net::HTTP::Get.new(uri.request_uri, configuration.http_headers)
+          
+          client.request(req)
+        end
+      end
+    end
 
     private # ----------------------------------------------
 
@@ -170,22 +188,7 @@ module Geocoder::Lookup
       end
     end
 
-    def make_api_request(query)
-      timeout(configuration.timeout) do
-        uri = URI.parse(query_url(query))
-        Geocoder.log(:debug, "Geocoder: HTTP request being made for #{uri.to_s}")
-        http_client.start(uri.host, uri.port, use_ssl: use_ssl?) do |client|
-          req = Net::HTTP::Get.new(uri.request_uri, configuration.http_headers)
-          if configuration.basic_auth[:user] and configuration.basic_auth[:password]
-            req.basic_auth(
-              configuration.basic_auth[:user],
-              configuration.basic_auth[:password]
-            )
-          end
-          client.request(req)
-        end
-      end
-    end
+   
 
   end
 end
