@@ -14,7 +14,7 @@ class OllehTest < GeocoderTestCase
 
   def test_request_header_for_geocode
     lookup = Geocoder::Lookup::Olleh.new    
-    assert Geocoder.config.http_headers[:Authorization] == "Basic T2xsZWhNYXBBUEkwMTAwOmJuY1Q4OWRmUlQ="
+    assert Geocoder.config.http_headers["Authorization"] == "Basic T2xsZWhNYXBBUEkwMTAwOmJuY1Q4OWRmUlQ="
   end
 
   def test_query_for_geocode
@@ -29,10 +29,15 @@ class OllehTest < GeocoderTestCase
     assert url.include?("addrcdtype%22%3A0%2C"), "Invalide address parsing"
   end
 
-  def test_cached
-    query = Geocoder::Query.new("서울특별시 강남구 삼성동 168-1")
+  def test_gecode_with_options
+    query = Geocoder::Query.new("서울특별시 강남구 삼성동 168-1",{:addrcdtype => 'law'})
+    lookup = Geocoder::Lookup::Olleh.new
+    url_with_params = lookup.query_url(query)
+    assert url_with_params.include? "%22addrcdtype%22%3A0%2C%22"
     # require 'pry'
     # binding.pry
+    # lookup.public_make_api_request(query)
+
   end
 
   def test_check_query_type

@@ -3,36 +3,50 @@ require 'geocoder/results/base'
 module Geocoder::Result
   class Olleh < Base
 
-    def address(format = :full)
-      @data['address']['formattedAddress']
+    def address
+      @data['ADDRESS'].gsub('+', ' ')
     end
 
     def city
-      @data['address']['locality']
+      @data['ADDRESS'].split('+').first
     end
 
+    def gu
+      @data['ADDRESS'].split('+')[1]
+    end
+
+    def dong
+      @data['ADDRESS'].split('+')[2]
+    end
+
+    def dong_code
+      @data['DONG_CODE']
+    end
+
+    alias_method :region, :country
+
     def state_code
-      @data['address']['adminDistrict']
+      ""
     end
 
     alias_method :state, :state_code
 
     def country
-      @data['address']['countryRegion']
+      "South Korea"
     end
 
     alias_method :country_code, :country
 
     def postal_code
-      @data['address']['postalCode']
+      ""
     end
 
     def coordinates
-      @data['point']['coordinates']
+      [@data['X'], @data['Y']]
     end
 
     def address_data
-      @data['address']
+      @data['ADDRESS']
     end
 
     def self.response_attributes

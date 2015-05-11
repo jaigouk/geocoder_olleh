@@ -139,6 +139,9 @@ module Geocoder
       def fixture_prefix
         "olleh"
       end    
+      def default_fixture_filename
+        "olleh_seoul"
+      end
       remove_method(:make_api_request)
 
       def make_api_request(query)        
@@ -148,7 +151,11 @@ module Geocoder
         if query.text == "invalid_json"
           return MockHttpResponse.new(:body => 'invalid json', :code => 200)
         end
-        read_fixture fixture_for_query(query)
+        if query.text.include? "삼성동"
+          read_fixture "olleh_seoul"
+        else        
+          read_fixture fixture_for_query(query)
+        end
       end
     end
 

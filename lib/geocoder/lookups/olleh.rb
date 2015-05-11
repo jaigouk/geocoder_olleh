@@ -45,7 +45,8 @@ module Geocoder::Lookup
     def initialize
       super
       Geocoder.configure(
-        :http_headers => {:Authorization => "Basic #{token}"}
+        :use_https => true,
+        :http_headers => {"Authorization" => "Basic #{token}"}
       )
     end
 
@@ -98,21 +99,31 @@ module Geocoder::Lookup
       end
     end
 
+    def public_request(query)
+      timeout(configuration.timeout) do
+        uri = URI.parse(query_url(query))
+        Geocoder.log(:debug, "Geocoder: HTTP request being made for #{uri.to_s}")
+        http_client.start(uri.host, uri.port, use_ssl: use_ssl?) do |client|
+          req = Net::HTTP::Get.new(uri.request_uri, configuration.http_headers)
+          
+          client.request(req)
+        end
+      end
+    end
+
     private # ----------------------------------------------
 
     # results goes through structure and check returned hash.
     def results(query)
-      doc = fetch_data(query)
-      return [] unless doc
-      if doc['statusCode'] == 200
-        return doc['resourceSets'].first['estimatedTotal'] > 0 ? doc['resourceSets'].first['resources'] : []
-      elsif doc['statusCode'] == 401 and doc["authenticationResultCode"] == "InvalidCredentials"
-        raise_error(Geocoder::InvalidApiKey) || Geocoder.log(:warn, "Invalid Bing API key.")
+      data = fetch_data(query)
+      return [] unless data
+      doc = JSON.parse(URI.decode(data["payload"]))
+      if doc['ERRCD'] == 0
+        return doc['RESDATA']["ADDRS"]
       else
-        Geocoder.log(:warn, "Bing Geocoding API error: #{doc['statusCode']} (#{doc['statusDescription']}).")
+        Geocoder.log(:warn, "Olleh API error: #{doc['ERRCD']} (#{doc['ERRMS'].gsub('+', ' ')}).")
       end
-      return doc
-
+      return doc['RESDATA']["ADDRS"]
     end
 
     def token
@@ -127,8 +138,6 @@ module Geocoder::Lookup
       Time.now.strftime("%Y%m%d%H%M%S%L")
     end
 
-    # need to be private. moved to public for testing
-    # ----------------------------------------------
     def base_url(query)
       case check_query_type(query)
       when "route_search"
@@ -163,7 +172,7 @@ module Geocoder::Lookup
           isJibun: Olleh.include_jibun[query.options[:include_jibun]],
           timestamp: now
        })
-      else
+      else # geocoding
         JSON.generate({
           addr: URI.encode(query.sanitized_text),
           addrcdtype: Olleh.addrcdtype[query.options[:addrcdtype]],
