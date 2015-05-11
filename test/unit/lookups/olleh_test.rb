@@ -70,9 +70,20 @@ class OllehTest < GeocoderTestCase
     assert result.address == "서울특별시 강남구 삼성동 74-14"
   end
 
-  # def test_google_result_components
-  #   result = Geocoder.search("Madison Square Garden, New York, NY").first
-  #   assert_equal "Manhattan",
-  #     result.address_components_of_type(:sublocality).first['long_name']
-  # end
+  def test_olleh_route_searching
+    query = Geocoder::Query.new(
+      "", {
+      start_x: 960713,
+      start_y: 1946274,
+      end_x: 950000,
+      end_y: 1940594,
+      priority: 'shortest',
+      coord_type: 'wgs84'
+    })
+    lookup = Geocoder::Lookup::Olleh.new
+    result = lookup.search(query).first
+    assert result.total_dist == "15714"
+    assert result.total_time == "42.2"
+  end
+
 end

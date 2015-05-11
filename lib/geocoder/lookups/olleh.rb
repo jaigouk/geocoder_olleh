@@ -4,13 +4,20 @@ require 'base64'
 require 'uri'
 require 'json'
 module Geocoder::Lookup
+  ##
+  # Route Search
+  # shortest : ignore traffic. shortest path
+  # high way : include high way 
+  # free way : no charge
+  # optimal  : based on traffic
   class Olleh < Base
 
+
     PRIORITY = {
-      'shortest' => 0, # 최단거리 
-      'high_way' => 1, # 고속도로 포함 
-      'free_way' => 2, # 
-      'optimal'  => 3  # 최적거리
+      'shortest' => 0, # 최단거리 우선 
+      'high_way' => 1, # 고속도로 우선 
+      'free_way' => 2, # 무료도로 우선 
+      'optimal'  => 3  # 최적경로 
     }
 
     ADDR_CD_TYPES = {
@@ -87,44 +94,45 @@ module Geocoder::Lookup
     end
 
 
- def make_api_request(query)
-      timeout(configuration.timeout) do
-        uri = URI.parse(query_url(query))
-        Geocoder.log(:debug, "Geocoder: HTTP request being made for #{uri.to_s}")
-        http_client.start(uri.host, uri.port, use_ssl: use_ssl?) do |client|
-          req = Net::HTTP::Get.new(uri.request_uri, configuration.http_headers)
-          
-          client.request(req)
-        end
-      end
-    end
-
-    def public_request(query)
-      timeout(configuration.timeout) do
-        uri = URI.parse(query_url(query))
-        Geocoder.log(:debug, "Geocoder: HTTP request being made for #{uri.to_s}")
-        http_client.start(uri.host, uri.port, use_ssl: use_ssl?) do |client|
-          req = Net::HTTP::Get.new(uri.request_uri, configuration.http_headers)
-          
-          client.request(req)
-        end
-      end
-    end
-
     private # ----------------------------------------------
 
     # results goes through structure and check returned hash.
     def results(query)
       data = fetch_data(query)
       return [] unless data
-
       doc = JSON.parse(URI.decode(data["payload"]))
-      if doc['ERRCD'] == 0 # NO ERROR
+
+      if doc['ERRCD'] != 0
+        Geocoder.log(:warn, "Olleh API error: #{doc['ERRCD']} (#{doc['ERRMS'].gsub('+', ' ')}).")
+        return [] 
+      end
+
+      # GEOCODING / REVERSE GECOCODING      
+      if doc['RESDATA']['COUNT']
         return [] if doc['RESDATA']['COUNT'] == 0
         return doc['RESDATA']["ADDRS"]
+        
+      # ROUTE SEARCH
+      elsif doc["RESDATA"]["SROUTE"] && doc["RESDATA"]["SROUTE"]["isRoute"]        
+        return [] if doc["RESDATA"]["SROUTE"]["isRoute"] == "false"
+        return doc["RESDATA"]
       else
-        Geocoder.log(:warn, "Olleh API error: #{doc['ERRCD']} (#{doc['ERRMS'].gsub('+', ' ')}).")
-      end      
+        []
+      end
+    end      
+    
+
+
+    def make_api_request(query)
+      timeout(configuration.timeout) do
+        uri = URI.parse(query_url(query))
+        Geocoder.log(:debug, "Geocoder: HTTP request being made for #{uri.to_s}")
+        http_client.start(uri.host, uri.port, use_ssl: use_ssl?) do |client|
+          req = Net::HTTP::Get.new(uri.request_uri, configuration.http_headers)
+          
+          client.request(req)
+        end
+      end
     end
 
     def token
@@ -145,6 +153,8 @@ module Geocoder::Lookup
         "https://openapi.kt.com/maps/etc/RouteSearch?params="
       when "reverse_geocoding"
         "https://openapi.kt.com/maps/geocode/GetAddrByGeocode?params="
+      when "convert_coord"
+        "https://openapi.kt.com/maps/etc/ConvertCoord?params="
       else
         "https://openapi.kt.com/maps/geocode/GetGeocodeByAddr?params="
       end
@@ -160,10 +170,18 @@ module Geocoder::Lookup
           EX: query.options[:end_x],
           EY: query.options[:end_y],
           RPTYPE: "0",
-          COORDTYPE: Olleh.coord_types[query.options[:coord_type]],
+          COORDTYPE: Olleh.coord_types[query.options[:coord_type]] || 7,
           PRIORITY: Olleh.priority[query.options[:priority]],
-          timestamp:  Util.now
+          timestamp:  now
        })      
+      when "convert_coord"
+        JSON.generate({
+          x: query.text.first,
+          y: query.text.last,
+          inCoordType: self.coord_types[options[:coord_in]],
+          outCoordType: self.coord_types[options[:coord_out]],
+          timestamp: now
+       })
       when "reverse_geocoding"
         JSON.generate({
           x: query.text.first,
@@ -191,8 +209,10 @@ module Geocoder::Lookup
     def check_query_type(query)
       if !query.options.blank? && query.options.include?(:priority)
         "route_search"
-      elsif !query.options.blank? && query.options.include?(:include_jibun)
+      elsif query.reverse_geocode?
         "reverse_geocoding"
+      elsif !query.options.blank? && query.options.include?(:coord_in)
+        "convert_coord"
       else
         "geocoding"
       end
