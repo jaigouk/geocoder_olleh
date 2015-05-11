@@ -86,4 +86,16 @@ class OllehTest < GeocoderTestCase
     assert result.total_time == "42.2"
   end
 
+  def test_olleh_convert_coord
+    query = Geocoder::Query.new(
+      [951203, 1950435], {
+      coord_in: 'utmk',
+      coord_out: 'wgs84'
+    })
+    lookup = Geocoder::Lookup::Olleh.new    
+    result = lookup.search(query).first
+    assert result.coord_type == "LLW"
+    assert result.converted_coord == ["126.9475548915227", "37.551966221235176"]
+  end
+
 end

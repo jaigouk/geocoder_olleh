@@ -155,6 +155,8 @@ module Geocoder
           read_fixture "olleh_seoul"
         elsif query.text.include? "960713"
           read_fixture "olleh_reverse"
+        elsif query.options.include?(:coord_in)
+          read_fixture "olleh_convert_coord"          
         elsif query.options.include?(:priority)
           read_fixture "olleh_routes"
         else

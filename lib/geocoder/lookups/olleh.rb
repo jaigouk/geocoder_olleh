@@ -69,10 +69,6 @@ module Geocoder::Lookup
       base_url(query) + url_query_string(query)
     end
 
-    def cache_key(query)
-      base_url(query) + url_query_string_for_cache(query)
-    end
-
     def self.priority
       PRIORITY
     end
@@ -111,21 +107,33 @@ module Geocoder::Lookup
         return [] 
       end
 
-      # GEOCODING / REVERSE GECOCODING      
-      if doc['RESDATA']['COUNT']
+      case decide_result_type(doc) 
+      when "geocoding_or_reverse_geocoding"
         return [] if doc['RESDATA']['COUNT'] == 0
-        return doc['RESDATA']["ADDRS"]
-        
-      # ROUTE SEARCH
-      elsif doc["RESDATA"]["SROUTE"] && doc["RESDATA"]["SROUTE"]["isRoute"]        
+        return doc['RESDATA']["ADDRS"]        
+      when "route_search"
         return [] if doc["RESDATA"]["SROUTE"]["isRoute"] == "false"
         return doc["RESDATA"]
-      else
+      when "converting_coord_system"
+        return doc['RESDATA']
+      else        
         []
       end
     end      
     
 
+    def decide_result_type(doc)
+      if doc['RESDATA']['COUNT']
+        "geocoding_or_reverse_geocoding"
+      elsif doc["RESDATA"]["SROUTE"] && doc["RESDATA"]["SROUTE"]["isRoute"]        
+        "route_search"
+      elsif doc['RESDATA']['COORD']
+        "converting_coord_system"
+      else  
+        return false
+      end
+        
+    end
 
     def make_api_request(query)
       timeout(configuration.timeout) do
@@ -182,8 +190,8 @@ module Geocoder::Lookup
         JSON.generate({
           x: query.text.first,
           y: query.text.last,
-          inCoordType: self.coord_types[options[:coord_in]],
-          outCoordType: self.coord_types[options[:coord_out]],
+          inCoordType: Olleh.coord_types[query.options[:coord_in]],
+          outCoordType: Olleh.coord_types[query.options[:coord_out]],
           timestamp: now
        })
       when "reverse_geocoding"
@@ -213,7 +221,7 @@ module Geocoder::Lookup
     def check_query_type(query)
       if !query.options.blank? && query.options.include?(:priority)
         "route_search"
-      elsif query.reverse_geocode?
+      elsif query.reverse_geocode? && query.options.include?(:include_jibun)
         "reverse_geocoding"
       elsif !query.options.blank? && query.options.include?(:coord_in)
         "convert_coord"
@@ -227,7 +235,7 @@ module Geocoder::Lookup
     # Need to delete timestamp from cache_key to hit cache
     #
     def cache_key(query)
-      query_url(query).split('timestamp')[0]
+      Geocoder.config[:cache_prefix] + query_url(query).split('timestamp')[0]
     end
    
 

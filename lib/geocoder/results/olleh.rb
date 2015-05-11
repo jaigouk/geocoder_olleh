@@ -82,6 +82,15 @@ module Geocoder::Result
       @data[1]['ROUTE']['rg']
     end
 
+    #########
+    # methods for converting coord system
+    def coord_type
+      @data[1]['COORDTYPE']
+    end
+
+    def converted_coord
+      [@data[1]["X"], @data[1]["Y"]]
+    end
 
     response_attributes.each do |a|
       define_method a do
