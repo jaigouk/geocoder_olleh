@@ -19,11 +19,8 @@ class CacheTest < GeocoderTestCase
       Geocoder.configure(:cache => {})
       next if l == :maxmind_local || l == :geoip2 # local, does not use cache
       Geocoder.configure(:lookup => l)
-      set_api_key!(l)
-      # if l == :olleh
-      #   require 'pry'
-      #   binding.pry
-      # end
+      Geocoder.configure(:cache_prefix => "")
+      set_api_key!(l)      
       results = Geocoder.search("Madison Square Garden")
       assert !results.first.cache_hit,
         "Lookup #{l} returned erroneously cached result."      

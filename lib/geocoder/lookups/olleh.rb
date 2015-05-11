@@ -69,6 +69,10 @@ module Geocoder::Lookup
       base_url(query) + url_query_string(query)
     end
 
+    def cache_key(query)
+      base_url(query) + url_query_string_for_cache(query)
+    end
+
     def self.priority
       PRIORITY
     end
@@ -218,6 +222,13 @@ module Geocoder::Lookup
       end
     end
 
+
+    ##
+    # Need to delete timestamp from cache_key to hit cache
+    #
+    def cache_key(query)
+      query_url(query).split('timestamp')[0]
+    end
    
 
   end
