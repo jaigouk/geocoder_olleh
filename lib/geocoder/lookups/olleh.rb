@@ -143,7 +143,8 @@ module Geocoder::Lookup
       timeout(configuration.timeout) do
         uri = URI.parse(query_url(query))
         Geocoder.log(:debug, "Geocoder: HTTP request being made for #{uri.to_s}")
-        http_client.start(uri.host, uri.port, :use_ssl => uri.scheme == 'https') do |client|
+
+        http_client.start(uri.host, uri.port, :use_ssl => true) do |client|
           req = Net::HTTP::Get.new(uri.request_uri, configuration.http_headers)          
           client.request(req)
         end
