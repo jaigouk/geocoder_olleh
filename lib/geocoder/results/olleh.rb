@@ -104,7 +104,7 @@ module Geocoder::Result
 
     # 법정동 - 시군구 
     def addr_step_sigungu
-      @data["SIGUNGU"]
+      @data["SIGUNGU"].gsub("+"," ")
     end
 
     def addr_step_dong
