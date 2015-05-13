@@ -8,7 +8,6 @@ group :development, :test do
   gem 'rubyzip'
   gem 'rails'
   gem 'test-unit' # needed for Ruby >=2.2.0
-  gem 'rest-client' #for using ssl
   gem 'byebug', platforms: :mri
   gem 'pry'
   platforms :jruby do

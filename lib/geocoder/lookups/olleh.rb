@@ -136,19 +136,17 @@ module Geocoder::Lookup
       else        
         []
       end
-    end      
-    
-
+    end        
 
     def make_api_request(query)
       timeout(configuration.timeout) do
-        # uri = URI.parse(query_url(query))
-        # Geocoder.log(:debug, "Geocoder: HTTP request being made for #{uri.to_s}")        
-        # http_client.start(uri.host, uri.port, :use_ssl => true) do |client|
-        #   req = Net::HTTP::Get.new(uri.request_uri, configuration.http_headers)          
-        #   client.request(req)
-        # end
-        RestClient.get query_url(query), configuration.http_headers
+        uri = URI.parse(query_url(query))
+        Geocoder.log(:debug, "Geocoder: HTTP request being made for #{uri.to_s}")        
+        http_client.start(uri.host, uri.port, :use_ssl => true) do |client|
+          req = Net::HTTP::Get.new(uri.request_uri, configuration.http_headers)          
+          client.request(req)
+        end
+        # RestClient.get query_url(query), configuration.http_headers
       end
     end
 
@@ -173,7 +171,7 @@ module Geocoder::Lookup
       when "convert_coord"
         "https://openapi.kt.com/maps/etc/ConvertCoord?params="
       when "addr_step_search"
-        "http://openapi.kt.com/maps/search/AddrStepSearch?params="
+        "https://openapi.kt.com/maps/search/AddrStepSearch?params="
       else
         "https://openapi.kt.com/maps/geocode/GetGeocodeByAddr?params="
       end
