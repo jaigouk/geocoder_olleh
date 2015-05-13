@@ -5,3 +5,4 @@ rdoc/*
 Gemfile.lock
 api_keys.yml
 test/geocoder_test.sqlite
+test/fixtures/dump.rdb
