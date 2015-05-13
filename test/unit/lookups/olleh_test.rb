@@ -51,6 +51,7 @@ class OllehTest < GeocoderTestCase
     assert result.country == "South Korea"
     assert result.city == "서울특별시"
     assert result.gu == "강남구"
+    
     assert result.dong == "삼성동"
     assert result.dong_code == "1168010500"
     assert result.coordinates == [960713, 1946274]
@@ -96,6 +97,20 @@ class OllehTest < GeocoderTestCase
     result = lookup.search(query).first
     assert result.coord_type == "LLW"
     assert result.converted_coord == ["126.9475548915227", "37.551966221235176"]
+  end
+
+  def test_olleh_addr_step_search
+    query = Geocoder::Query.new(
+      "", {
+      l_code: 11
+    })
+    lookup = Geocoder::Lookup::Olleh.new    
+    result = lookup.search(query).first
+    assert result.addr_step_sido == "서울특별시"
+    assert result.addr_step_sigungu == "종로구"
+    assert result.addr_step_l_code == "11110"
+    assert result.coordinates == ["954050", "1952755"]
+    assert result.addr_step_p_code == "009000023000000"
   end
 
 end
