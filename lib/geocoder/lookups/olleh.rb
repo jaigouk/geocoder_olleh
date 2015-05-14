@@ -3,26 +3,25 @@ require "geocoder/results/olleh"
 require 'base64'
 require 'uri'
 require 'json'
-require 'rest-client'
 module Geocoder::Lookup
   ##
   # Route Search
   # shortest : ignore traffic. shortest path
-  # high way : include high way 
+  # high way : include high way
   # free way : no charge
   # optimal  : based on traffic
   class Olleh < Base
 
 
     PRIORITY = {
-      'shortest' => 0, # 최단거리 우선 
-      'high_way' => 1, # 고속도로 우선 
-      'free_way' => 2, # 무료도로 우선 
-      'optimal'  => 3  # 최적경로 
+      'shortest' => 0, # 최단거리 우선
+      'high_way' => 1, # 고속도로 우선
+      'free_way' => 2, # 무료도로 우선
+      'optimal'  => 3  # 최적경로
     }
 
     ADDR_CD_TYPES = {
-      'law'            => 0, # 법정동 
+      'law'            => 0, # 법정동
       'administration' => 1, # 행정동
       'law_and_admin'  => 2,
       'road'           => 3
@@ -89,7 +88,7 @@ module Geocoder::Lookup
     def self.coord_types
       COORD_TYPES
     end
-    
+
     def auth_key
       token
     end
@@ -102,7 +101,7 @@ module Geocoder::Lookup
       elsif !query.options.blank? && query.options.include?(:coord_in)
         query.options[:query_type] || query.options[:query_type] = "convert_coord"
       elsif !query.options.blank? && query.options.include?(:l_code)
-        query.options[:query_type] || query.options[:query_type] = "addr_step_search" 
+        query.options[:query_type] || query.options[:query_type] = "addr_step_search"
       else
         query.options[:query_type] || query.options[:query_type] = "geocoding"
       end
@@ -119,34 +118,33 @@ module Geocoder::Lookup
       err_msg = doc['ERRMS'] || doc['ERRMSG']
       if err_code.to_i != 0
         Geocoder.log(:warn, "Olleh API error: #{err_code} (#{err_msg.gsub('+', ' ')}).")
-        return [] 
+        return []
       end
 
       case Olleh.check_query_type(query)
       when "geocoding" || "reverse_geocoding"
         return [] if doc['RESDATA']['COUNT'] == 0
-        return doc['RESDATA']["ADDRS"]        
+        return doc['RESDATA']["ADDRS"]
       when "route_search"
         return [] if doc["RESDATA"]["SROUTE"]["isRoute"] == "false"
         return doc["RESDATA"]
       when "convert_coord"
         return doc['RESDATA']
       when "addr_step_search"
-        return doc['RESULTDATA']        
-      else        
+        return doc['RESULTDATA']
+      else
         []
       end
-    end        
+    end
 
     def make_api_request(query)
       timeout(configuration.timeout) do
         uri = URI.parse(query_url(query))
-        Geocoder.log(:debug, "Geocoder: HTTP request being made for #{uri.to_s}")        
+        Geocoder.log(:debug, "Geocoder: HTTP request being made for #{uri.to_s}")
         http_client.start(uri.host, uri.port, :use_ssl => true) do |client|
-          req = Net::HTTP::Get.new(uri.request_uri, configuration.http_headers)          
+          req = Net::HTTP::Get.new(uri.request_uri, configuration.http_headers)
           client.request(req)
         end
-        # RestClient.get query_url(query), configuration.http_headers
       end
     end
 
@@ -190,7 +188,7 @@ module Geocoder::Lookup
           COORDTYPE: Olleh.coord_types[query.options[:coord_type]] || 7,
           PRIORITY: Olleh.priority[query.options[:priority]],
           timestamp:  now
-       })      
+       })
       when "convert_coord"
         JSON.generate({
           x: query.text.first,
@@ -226,7 +224,7 @@ module Geocoder::Lookup
       URI.encode(
         query_url_params(query)
       ).gsub(':','%3A').gsub(',','%2C').gsub('https%3A', 'https:')
-    end  
+    end
 
     ##
     # Need to delete timestamp from cache_key to hit cache
@@ -234,7 +232,7 @@ module Geocoder::Lookup
     def cache_key(query)
       Geocoder.config[:cache_prefix] + query_url(query).split('timestamp')[0]
     end
-   
+
 
   end
 end

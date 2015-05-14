@@ -53,6 +53,22 @@ module Geocoder::Result
       [@data['X'], @data['Y']]
     end
 
+    #########
+    # methods for returning wgs coordiates from
+    #
+    def wgs_coordinates
+      return @data["WGS_COORDINATES"] if @data["WGS_COORDINATES"]
+      query = Geocoder::Query.new(
+        coordinates, {
+        coord_in: 'utmk',
+        coord_out: 'wgs84'
+      })
+      lookup = Geocoder::Lookup::Olleh.new
+      wgs = lookup.search(query).first.converted_coord
+      @data["WGS_COORDINATES"] = wgs
+      wgs
+    end
+
     def address_data
       @data['ADDRESS']
     end
@@ -102,7 +118,7 @@ module Geocoder::Result
       @data["SIDO"]
     end
 
-    # 법정동 - 시군구 
+    # 법정동 - 시군구
     def addr_step_sigungu
       @data["SIGUNGU"].gsub("+"," ")
     end
@@ -126,7 +142,7 @@ module Geocoder::Result
     end
 
     # 파란코드
-    def addr_step_p_code  
+    def addr_step_p_code
       @data["P_CODE"]
     end
 
