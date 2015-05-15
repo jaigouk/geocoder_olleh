@@ -102,6 +102,8 @@ module Geocoder::Lookup
         query.options[:query_type] || query.options[:query_type] = "convert_coord"
       elsif !query.options.blank? && query.options.include?(:l_code)
         query.options[:query_type] || query.options[:query_type] = "addr_step_search"
+      elsif !query.options.blank? && query.options.include?(:radius)
+        query.options[:query_type] || query.options[:query_type] = "addr_nearest_position_search"
       else
         query.options[:query_type] || query.options[:query_type] = "geocoding"
       end
@@ -132,6 +134,8 @@ module Geocoder::Lookup
         return doc['RESDATA']
       when "addr_step_search"
         return doc['RESULTDATA']
+      when "addr_nearest_position_search"
+        return doc['RESULTDATA']
       else
         []
       end
@@ -148,18 +152,6 @@ module Geocoder::Lookup
       end
     end
 
-    def token
-      if a = configuration.api_key
-        if a.is_a?(Array)
-          return  Base64.encode64("#{a.first}:#{a.last}").strip
-        end
-      end
-    end
-
-    def now
-      Time.now.strftime("%Y%m%d%H%M%S%L")
-    end
-
     def base_url(query)
       case Olleh.check_query_type(query)
       when "route_search"
@@ -170,23 +162,24 @@ module Geocoder::Lookup
         "https://openapi.kt.com/maps/etc/ConvertCoord?params="
       when "addr_step_search"
         "https://openapi.kt.com/maps/search/AddrStepSearch?params="
+      when "addr_nearest_position_search"
+        "https://openapi.kt.com/maps/search/AddrNearestPosSearch?params="
       else
         "https://openapi.kt.com/maps/geocode/GetGeocodeByAddr?params="
       end
     end
 
-
     def query_url_params(query)
       case Olleh.check_query_type(query)
       when "route_search"
         JSON.generate({
-          SX: query.options[:start_x],
-          SY: query.options[:start_y],
-          EX: query.options[:end_x],
-          EY: query.options[:end_y],
-          RPTYPE: "0",
-          COORDTYPE: Olleh.coord_types[query.options[:coord_type]] || 7,
-          PRIORITY: Olleh.priority[query.options[:priority]],
+          sx: query.options[:start_x],
+          sy: query.options[:start_y],
+          ex: query.options[:end_x],
+          ey: query.options[:end_y],
+          rtype: "0",
+          coordtype: Olleh.coord_types[query.options[:coord_type]] || 7,
+          priority: Olleh.priority[query.options[:priority]],
           timestamp:  now
        })
       when "convert_coord"
@@ -211,6 +204,13 @@ module Geocoder::Lookup
           l_Code: query.options[:l_code],
           timestamp: now
         })
+      when "addr_nearest_position_search"
+        JSON.generate({
+          px: query.options[:px],
+          py: query.options[:py],
+          radius: query.options[:radius],
+          timestamp: now
+        })
       else # geocoding
         JSON.generate({
           addr: URI.encode(query.sanitized_text),
@@ -219,6 +219,19 @@ module Geocoder::Lookup
         })
       end
     end
+
+    def token
+      if a = configuration.api_key
+        if a.is_a?(Array)
+          return  Base64.encode64("#{a.first}:#{a.last}").strip
+        end
+      end
+    end
+
+    def now
+      Time.now.strftime("%Y%m%d%H%M%S%L")
+    end
+
 
     def url_query_string(query)
       URI.encode(

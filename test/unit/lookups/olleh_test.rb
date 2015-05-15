@@ -118,4 +118,16 @@ class OllehTest < GeocoderTestCase
     assert result.wgs_coordinates == ['126.9475548915227', '37.551966221235176']
   end
 
+  def test_olleh_addr_nearest_position_search
+    query = Geocoder::Query.new(
+      '', {
+      px: 966759,
+      py: 1947935,
+      radius: 100
+    })
+    lookup = Geocoder::Lookup::Olleh.new
+    result = lookup.search(query).first
+    assert result.position_address == "서울특별시 강동구 성내동 540"
+  end
+
 end

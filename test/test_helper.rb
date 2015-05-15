@@ -93,7 +93,7 @@ module Geocoder
     class Base
       private
 
-      def fixture_exists?(filename)     
+      def fixture_exists?(filename)
         File.exist?(File.join("test", "fixtures", filename))
       end
 
@@ -114,7 +114,7 @@ module Geocoder
         handle
       end
 
-      def fixture_for_query(query)        
+      def fixture_for_query(query)
         label = query.reverse_geocode? ? "reverse" : query.text.gsub(/[ \.]/, "_")
         filename = "#{fixture_prefix}_#{label}"
         fixture_exists?(filename) ? filename : default_fixture_filename
@@ -122,7 +122,7 @@ module Geocoder
 
       remove_method(:make_api_request)
 
-      def make_api_request(query)        
+      def make_api_request(query)
         return raise TimeoutError if query.text == "timeout"
         return raise SocketError if query.text == "socket_error"
         return raise Errno::ECONNREFUSED if query.text == "connection_refused"
@@ -138,13 +138,13 @@ module Geocoder
       private
       def fixture_prefix
         "olleh"
-      end    
+      end
       def default_fixture_filename
         "olleh_seoul"
       end
       remove_method(:make_api_request)
 
-      def make_api_request(query)        
+      def make_api_request(query)
         return raise TimeoutError if query.text == "timeout"
         return raise SocketError if query.text == "socket_error"
         return raise Errno::ECONNREFUSED if query.text == "connection_refused"
@@ -157,11 +157,13 @@ module Geocoder
         elsif query.text.include? "960713"
           read_fixture "olleh_reverse"
         elsif query.options.include?(:coord_in)
-          read_fixture "olleh_convert_coord"          
+          read_fixture "olleh_convert_coord"
         elsif query.options.include?(:priority)
           read_fixture "olleh_routes"
         elsif query.options.include?(:l_code)
           read_fixture "olleh_addr_step_search"
+        elsif query.options.include?(:radius)
+          read_fixture "olleh_nearest_position_search"
         else
           read_fixture fixture_for_query(query)
         end
@@ -319,7 +321,7 @@ module Geocoder
       end
     end
 
-    
+
   end
 end
 

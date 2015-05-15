@@ -78,7 +78,7 @@ module Geocoder::Result
     end
 
 
-    #########
+    ##
     # methods for route search results
     # total_time : minutes
     # total_dist : meter
@@ -99,7 +99,7 @@ module Geocoder::Result
       @data[1]['ROUTE']['rg']
     end
 
-    #########
+    ##
     # methods for converting coord system
     #
     def coord_type
@@ -110,7 +110,7 @@ module Geocoder::Result
       [@data[1]["X"], @data[1]["Y"]]
     end
 
-    #########
+    ##
     # methods for parsing adress step search
     #
     # 법정동 - 시도
@@ -118,6 +118,7 @@ module Geocoder::Result
       @data["SIDO"]
     end
 
+    ##
     # 법정동 - 시군구
     def addr_step_sigungu
       @data["SIGUNGU"].gsub("+"," ")
@@ -130,20 +131,27 @@ module Geocoder::Result
     def addr_step_li
       @data["LI"]
     end
-
+    ##
     # 법정동코드
     def addr_step_l_code
       @data["L_CODE"]
     end
-
+    ##
     # 행정동코드
     def addr_step_h_code
       @data["H_CODE"]
     end
-
+    ##
     # 파란코드
     def addr_step_p_code
       @data["P_CODE"]
+    end
+
+    ##
+    # methods for parsing nearest position search
+    #
+    def position_address
+      "#{@data['SIDO']} #{@data['L_SIGUN_GU']} #{@data['L_DONG']} #{@data['GIBUN']}"
     end
 
     response_attributes.each do |a|
