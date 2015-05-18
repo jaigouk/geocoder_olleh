@@ -1,9 +1,4 @@
 language: ruby
-env:
-  - DB=
-  - DB=sqlite
-  - DB=postgres
-  - DB=mysql
 rvm:
   - 1.9.3
   - 2.0.0
@@ -13,18 +8,3 @@ rvm:
   - rbx-2
 gemfile:
   - Gemfile
-  - gemfiles/Gemfile.ruby1.9.3
-matrix:
-  exclude:
-    - rvm: 1.9.3
-      gemfile: Gemfile
-    - rvm: 2.0.0
-      gemfile: gemfiles/Gemfile.ruby1.9.3
-    - rvm: 2.1.2
-      gemfile: gemfiles/Gemfile.ruby1.9.3
-    - rvm: 2.2.0
-      gemfile: gemfiles/Gemfile.ruby1.9.3
-    - rvm: jruby-19mode
-      gemfile: gemfiles/Gemfile.ruby1.9.3
-    - rvm: rbx-2
-      gemfile: gemfiles/Gemfile.ruby1.9.3

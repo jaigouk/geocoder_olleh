@@ -94,15 +94,15 @@ module Geocoder::Lookup
     end
 
     def self.check_query_type(query)
-      if !query.options.blank? && query.options.include?(:priority)
+      if !query.options.empty? && query.options.include?(:priority)
         query.options[:query_type] || query.options[:query_type] = "route_search"
       elsif query.reverse_geocode? && query.options.include?(:include_jibun)
         query.options[:query_type] || query.options[:query_type] = "reverse_geocoding"
-      elsif !query.options.blank? && query.options.include?(:coord_in)
+      elsif !query.options.empty? && query.options.include?(:coord_in)
         query.options[:query_type] || query.options[:query_type] = "convert_coord"
-      elsif !query.options.blank? && query.options.include?(:l_code)
+      elsif !query.options.empty? && query.options.include?(:l_code)
         query.options[:query_type] || query.options[:query_type] = "addr_step_search"
-      elsif !query.options.blank? && query.options.include?(:radius)
+      elsif !query.options.empty? && query.options.include?(:radius)
         query.options[:query_type] || query.options[:query_type] = "addr_nearest_position_search"
       else
         query.options[:query_type] || query.options[:query_type] = "geocoding"
