@@ -121,8 +121,6 @@ module Geocoder::Lookup
       end
     end
 
-
-
     def make_api_request(query)
       timeout(configuration.timeout) do
         uri = URI.parse(query_url(query))

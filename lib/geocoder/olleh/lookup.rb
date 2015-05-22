@@ -38,9 +38,9 @@ module Geocoder
     end
 
     def get(name)
-      @services = {} unless defined? @services
-      @services[name] = spawn(name) unless @services.include?(name)
-      @services[name]
+      @services_with_olleh = {} unless defined? @services_with_olleh
+      @services_with_olleh[name] = spawn(name) unless @services_with_olleh.include?(name)
+      @services_with_olleh[name]
     end
 
     private # -----------------------------------------------------------------
