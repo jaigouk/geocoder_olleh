@@ -1,0 +1,9 @@
+{
+  "sequenceno": "9999",
+  "errordescription": null,
+  "returncode": "1",
+  "transactionid": "e24bda70-393a-39bb-aaf4-100fcddfb4ac",
+  "payload": "%7B%22RESDATA%22%3A%7B%22COUNT%22%3A0%7D%2C%22ID%22%3A%22501%22%2C%22ERRCD%22%3A0%2C%22NO%22%3A%22e24bda70-393a-39bb-aaf4-100fcddfb4ac%22%2C%22ERRMS%22%3A%22SUCCESS%22%7D",
+  "errorcode": null,
+  "returndescription": "SUCCESS"
+}
