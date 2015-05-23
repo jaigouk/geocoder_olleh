@@ -93,4 +93,26 @@ class OllehTest < GeocoderTestCase
     assert result.total_time == "42.2"
   end
 
+  def test_olleh_route_searching_with_waypoints
+    query = Geocoder::Query.new(
+      "", {
+      start_x: 960713,
+      start_y: 1946274,
+      end_x: 961596,
+      end_y: 1944521,
+      vx1: 951285,
+      vy1: 1942777,
+      vx2: 957907,
+      vy2: 1947861,
+      vx3: 960364,
+      vy3: 1941907,
+      priority: 'optimal',
+      coord_type: 'utmk'
+    })
+    lookup = Geocoder::Lookup::Olleh.new
+    result = lookup.search(query).first
+    assert result.total_dist == "37377"
+    assert result.total_time == "113.35"
+  end
+
 end

@@ -48,6 +48,16 @@ module Geocoder::Lookup
       'wgs84'   => 7,
       'bessel'  => 8
     }
+    ROUTE_COORD_TYPES = {
+      'geographic'=> 0,
+      'tm_west'   => 1,
+      'tm_mid'    => 2,
+      'tm_east'   => 3,
+      'katec'     => 4,
+      'utm52'     => 5,
+      'utm51'     => 6,
+      'utmk'      => 7
+    }
 
     def initialize
       super
@@ -87,6 +97,10 @@ module Geocoder::Lookup
 
     def self.coord_types
       COORD_TYPES
+    end
+
+    def self.route_coord_types
+      ROUTE_COORD_TYPES
     end
 
     def auth_key
@@ -164,19 +178,19 @@ module Geocoder::Lookup
       case check_query_type(query)
       when "route_search"
         JSON.generate({
-          sx: query.options[:start_x],
-          sy: query.options[:start_y],
-          ex: query.options[:end_x],
-          ey: query.options[:end_y],
-          vx1: query.options[:vx1],
-          vy1: query.options[:vy1],
-          vx2: query.options[:vx2],
-          vy2: query.options[:vy2],
-          vx3: query.options[:vx3],
-          vy3: query.options[:vy3],
-          rptype: 0,
-          coordtype: Olleh.coord_types[query.options[:coord_type]] || 7,
-          priority: Olleh.priority[query.options[:priority]],
+          SX: query.options[:start_x],
+          SY: query.options[:start_y],
+          EX: query.options[:end_x],
+          EY: query.options[:end_y],
+          VX1: query.options[:vx1],
+          VY1: query.options[:vy1],
+          VX2: query.options[:vx2],
+          VY2: query.options[:vy2],
+          VX3: query.options[:vx3],
+          VY3: query.options[:vy3],
+          RPTYPE: 0,
+          COORDTYPE: Olleh.route_coord_types[query.options[:coord_type]] || 7,
+          PRIORITY: Olleh.priority[query.options[:priority]],
           timestamp:  now
        })
       when "convert_coord"
