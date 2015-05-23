@@ -74,7 +74,7 @@ class OllehTest < GeocoderTestCase
     query = Geocoder::Query.new([960713, 1946274],{coord_in: 'wgs84', coord_out: 'utmk'})
     lookup = Geocoder::Lookup::Olleh.new
     result = lookup.search(query).first
-    assert result.converted_coordinates == ["127.05543973133743", "37.51491635059331"]
+    assert result.converted_coord == ["127.05543973133743", "37.51491635059331"]
   end
 
   def test_olleh_route_searching
@@ -113,6 +113,37 @@ class OllehTest < GeocoderTestCase
     result = lookup.search(query).first
     assert result.total_dist == "37377"
     assert result.total_time == "113.35"
+  end
+
+  def test_olleh_addr_step_search
+    query = Geocoder::Query.new('', {l_code: 11})
+    lookup = Geocoder::Lookup::Olleh.new
+    result = lookup.search(query).first
+    assert result.addr_step_sido == '서울특별시'
+    assert result.addr_step_sigungu == '종로구'
+    assert result.addr_step_l_code == '11110'
+    assert result.coordinates == ['954050', '1952755']
+    assert result.addr_step_p_code == '009000023000000'
+  end
+
+  def test_olleh_result_wgs_coordinates
+    query = Geocoder::Query.new('', {l_code: 11})
+    lookup = Geocoder::Lookup::Olleh.new
+    result = lookup.search(query).first
+    assert result.coordinates == ['954050', '1952755']
+    assert result.wgs_coordinates == ["127.05543973133743", "37.51491635059331"]
+  end
+
+  def test_olleh_addr_nearest_position_search
+    query = Geocoder::Query.new(
+      '', {
+      px: 966759,
+      py: 1947935,
+      radius: 100
+    })
+    lookup = Geocoder::Lookup::Olleh.new
+    result = lookup.search(query).first
+    assert result.position_address == "서울특별시 강동구 성내동 540"
   end
 
 end

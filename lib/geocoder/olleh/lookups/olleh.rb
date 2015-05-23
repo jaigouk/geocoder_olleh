@@ -107,6 +107,22 @@ module Geocoder::Lookup
       token
     end
 
+    def self.check_query_type(query)
+      if !query.options.empty? && query.options.include?(:priority)
+        query.options[:query_type] || query.options[:query_type] = "route_search"
+      elsif query.reverse_geocode? && query.options.include?(:include_jibun)
+        query.options[:query_type] || query.options[:query_type] = "reverse_geocoding"
+      elsif !query.options.empty? && query.options.include?(:coord_in)
+        query.options[:query_type] || query.options[:query_type] = "convert_coord"
+      elsif !query.options.empty? && query.options.include?(:l_code)
+        query.options[:query_type] || query.options[:query_type] = "addr_step_search"
+      elsif !query.options.empty? && query.options.include?(:radius)
+        query.options[:query_type] || query.options[:query_type] = "addr_nearest_position_search"
+      else
+        query.options[:query_type] || query.options[:query_type] = "geocoding"
+      end
+    end
+
 
     private # ----------------------------------------------
 
@@ -115,22 +131,24 @@ module Geocoder::Lookup
       data = fetch_data(query)
       return [] unless data
       doc = JSON.parse(URI.decode(data["payload"]))
-      if doc['ERRCD'] != 0
-        Geocoder.log(:warn, "Olleh API error: #{doc['ERRCD']} (#{doc['ERRMS'].gsub('+', ' ')}).")
+      if doc['ERRCD'] != nil && doc['ERRCD'] != 0
+        Geocoder.log(:warn, "Olleh API error: #{doc['ERRCD']} (#{doc['ERRMS'] if doc['ERRMS']}).")
         return []
       end
-      # GEOCODING / REVERSE GECOCODING
-      if doc['RESDATA']['COUNT']
+
+      case Olleh.check_query_type(query)
+      when "geocoding" || "reverse_geocoding"
         return [] if doc['RESDATA']['COUNT'] == 0
         return doc['RESDATA']["ADDRS"]
-      # ROUTE SEARCH
-      elsif doc['RESDATA']['SROUTE'] && doc['RESDATA']['SROUTE']['isRoute']
-        return [] if doc['RESDATA']['SROUTE']['isRoute'] == 'false'
+      when "route_search"
+        return [] if doc["RESDATA"]["SROUTE"]["isRoute"] == "false"
+        return doc["RESDATA"]
+      when "convert_coord"
         return doc['RESDATA']
-      # CONVERT COORDINATES
-      elsif doc['RESDATA']['COORD'] && doc['RESDATA']['COORD']['COORDTYPE']
-        return [] if doc['RESDATA']['COORD']['X'] == ''
-        return doc['RESDATA']
+      when "addr_step_search"
+        return doc['RESULTDATA']
+      when "addr_nearest_position_search"
+        return doc['RESULTDATA']
       else
         []
       end
@@ -140,34 +158,25 @@ module Geocoder::Lookup
       timeout(configuration.timeout) do
         uri = URI.parse(query_url(query))
         Geocoder.log(:debug, "Geocoder: HTTP request being made for #{uri.to_s}")
-        http_client.start(uri.host, uri.port, use_ssl: use_ssl?) do |client|
+        http_client.start(uri.host, uri.port, :use_ssl => true) do |client|
           req = Net::HTTP::Get.new(uri.request_uri, configuration.http_headers)
-
           client.request(req)
         end
       end
     end
 
-    def token
-      if a = configuration.api_key
-        if a.is_a?(Array)
-          return  Base64.encode64("#{a.first}:#{a.last}").strip
-        end
-      end
-    end
-
-    def now
-      Time.now.strftime("%Y%m%d%H%M%S%L")
-    end
-
     def base_url(query)
-      case check_query_type(query)
+      case Olleh.check_query_type(query)
       when "route_search"
         "https://openapi.kt.com/maps/etc/RouteSearch?params="
       when "reverse_geocoding"
         "https://openapi.kt.com/maps/geocode/GetAddrByGeocode?params="
       when "convert_coord"
         "https://openapi.kt.com/maps/etc/ConvertCoord?params="
+      when "addr_step_search"
+        "https://openapi.kt.com/maps/search/AddrStepSearch?params="
+      when "addr_nearest_position_search"
+        "https://openapi.kt.com/maps/search/AddrNearestPosSearch?params="
       else
         "https://openapi.kt.com/maps/geocode/GetGeocodeByAddr?params="
       end
@@ -175,7 +184,7 @@ module Geocoder::Lookup
 
 
     def query_url_params(query)
-      case check_query_type(query)
+      case Olleh.check_query_type(query)
       when "route_search"
         JSON.generate({
           SX: query.options[:start_x],
@@ -197,8 +206,8 @@ module Geocoder::Lookup
         JSON.generate({
           x: query.text.first,
           y: query.text.last,
-          inCoordType: self.coord_types[options[:coord_in]],
-          outCoordType: self.coord_types[options[:coord_out]],
+          inCoordType: Olleh.coord_types[query.options[:coord_in]],
+          outCoordType: Olleh.coord_types[query.options[:coord_out]],
           timestamp: now
        })
       when "reverse_geocoding"
@@ -210,6 +219,18 @@ module Geocoder::Lookup
           isJibun: Olleh.include_jibun[query.options[:include_jibun]] || 0,
           timestamp: now
        })
+      when "addr_step_search"
+        JSON.generate({
+          l_Code: query.options[:l_code],
+          timestamp: now
+        })
+      when "addr_nearest_position_search"
+        JSON.generate({
+          px: query.options[:px],
+          py: query.options[:py],
+          radius: query.options[:radius],
+          timestamp: now
+        })
       else # geocoding
         JSON.generate({
           addr: URI.encode(query.sanitized_text),
@@ -219,25 +240,29 @@ module Geocoder::Lookup
       end
     end
 
+    def token
+      if a = configuration.api_key
+        if a.is_a?(Array)
+          return  Base64.encode64("#{a.first}:#{a.last}").strip
+        end
+      end
+    end
+
+    def now
+      Time.now.strftime("%Y%m%d%H%M%S%L")
+    end
+
     def url_query_string(query)
       URI.encode(
         query_url_params(query)
       ).gsub(':','%3A').gsub(',','%2C').gsub('https%3A', 'https:')
     end
 
-    def check_query_type(query)
-      if !query.options.empty? && query.options.include?(:priority)
-        "route_search"
-      elsif query.reverse_geocode?
-        "reverse_geocoding"
-      elsif !query.options.empty? && query.options.include?(:coord_in)
-        "convert_coord"
-      else
-        "geocoding"
-      end
+    ##
+    # Need to delete timestamp from cache_key to hit cache
+    #
+    def cache_key(query)
+      Geocoder.config[:cache_prefix] + query_url(query).split('timestamp')[0]
     end
-
-
-
   end
 end

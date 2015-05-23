@@ -157,16 +157,21 @@ module Geocoder
         if query.text == "invalid_json"
           return MockHttpResponse.new(:body => 'invalid json', :code => 200)
         end
-        if query.text.include? "삼성동"
-          read_fixture "olleh_seoul"
-        elsif query.text.include?("960713") && !query.options.include?(:coord_in)
-          read_fixture "olleh_reverse"
-        elsif query.options.include?(:vx1)
+
+        if query.options.include?(:vx1)
           read_fixture "olleh_waypoints"
         elsif query.options.include?(:priority)
           read_fixture "olleh_routes"
         elsif query.options.include?(:coord_in)
           read_fixture "olleh_convert_coordinates"
+        elsif query.options.include?(:l_code)
+          read_fixture "olleh_addr_step_search"
+        elsif query.options.include?(:radius)
+          read_fixture "olleh_nearest_position_search"
+        elsif query.text.include?("960713") && !query.options.include?(:coord_in)
+          read_fixture "olleh_reverse"
+        elsif query.text.include? "삼성동"
+          read_fixture "olleh_seoul"
         else
           read_fixture fixture_for_query(query)
         end
