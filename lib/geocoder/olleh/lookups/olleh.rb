@@ -164,19 +164,19 @@ module Geocoder::Lookup
       case check_query_type(query)
       when "route_search"
         JSON.generate({
-          SX: query.options[:start_x],
-          SY: query.options[:start_y],
-          EX: query.options[:end_x],
-          EY: query.options[:end_y],
-          VX1: query.options[:vx1],
-          VY1: query.options[:vy1],
-          VX2: query.options[:vx2],
-          VY2: query.options[:vy2],
-          VX3: query.options[:vx3],
-          VY3: query.options[:vy3],
-          RPTYPE: "0",
-          COORDTYPE: Olleh.coord_types[query.options[:coord_type]] || 7,
-          PRIORITY: Olleh.priority[query.options[:priority]],
+          sx: query.options[:start_x],
+          sy: query.options[:start_y],
+          ex: query.options[:end_x],
+          ey: query.options[:end_y],
+          vx1: query.options[:vx1],
+          vy1: query.options[:vy1],
+          vx2: query.options[:vx2],
+          vy2: query.options[:vy2],
+          vx3: query.options[:vx3],
+          vy3: query.options[:vy3],
+          rptype: 0,
+          coordtype: Olleh.coord_types[query.options[:coord_type]] || 7,
+          priority: Olleh.priority[query.options[:priority]],
           timestamp:  now
        })
       when "convert_coord"
