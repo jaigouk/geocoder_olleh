@@ -1,0 +1,9 @@
+{
+  "sequenceno": "9999",
+  "errordescription": null,
+  "returncode": "1",
+  "transactionid": "74249850-cdaa-3b3d-86e6-6ecfd7855469",
+  "payload": "%7B%22RESDATA%22%3A%7B%22COORD%22%3A%7B%22COORDTYPE%22%3A%22LLW%22%2C%22Y%22%3A%2237.51491635059331%22%2C%22X%22%3A%22127.05543973133743%22%7D%7D%2C%22ID%22%3A%22601%22%2C%22ERRCD%22%3A0%2C%22NO%22%3A%2274249850-cdaa-3b3d-86e6-6ecfd7855469%22%2C%22ERRMS%22%3A%22SUCCESS%22%7D",
+  "errorcode": null,
+  "returndescription": "SUCCESS"
+}

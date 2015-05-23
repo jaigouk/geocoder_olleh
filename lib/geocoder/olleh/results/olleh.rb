@@ -64,6 +64,15 @@ module Geocoder::Result
       %w[bbox name confidence entityType]
     end
 
+    #########
+    # CONVERTED COORD TYPE
+    def converted_coord_type
+      @data[1]['COORDTYPE']
+    end
+
+    def converted_coordinates
+      [@data[1]['X'], @data[1]['Y']]
+    end
 
     #########
     # methods for route search results

@@ -159,10 +159,12 @@ module Geocoder
         end
         if query.text.include? "삼성동"
           read_fixture "olleh_seoul"
-        elsif query.text.include? "960713"
+        elsif query.text.include?("960713") && !query.options.include?(:coord_in)
           read_fixture "olleh_reverse"
         elsif query.options.include?(:priority)
           read_fixture "olleh_routes"
+        elsif query.options.include?(:coord_in)
+          read_fixture "olleh_convert_coordinates"
         else
           read_fixture fixture_for_query(query)
         end

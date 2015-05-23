@@ -101,21 +101,22 @@ module Geocoder::Lookup
       data = fetch_data(query)
       return [] unless data
       doc = JSON.parse(URI.decode(data["payload"]))
-
       if doc['ERRCD'] != 0
         Geocoder.log(:warn, "Olleh API error: #{doc['ERRCD']} (#{doc['ERRMS'].gsub('+', ' ')}).")
         return []
       end
-
       # GEOCODING / REVERSE GECOCODING
       if doc['RESDATA']['COUNT']
         return [] if doc['RESDATA']['COUNT'] == 0
         return doc['RESDATA']["ADDRS"]
-
       # ROUTE SEARCH
-      elsif doc["RESDATA"]["SROUTE"] && doc["RESDATA"]["SROUTE"]["isRoute"]
-        return [] if doc["RESDATA"]["SROUTE"]["isRoute"] == "false"
-        return doc["RESDATA"]
+      elsif doc['RESDATA']['SROUTE'] && doc['RESDATA']['SROUTE']['isRoute']
+        return [] if doc['RESDATA']['SROUTE']['isRoute'] == 'false'
+        return doc['RESDATA']
+      # CONVERT COORDINATES
+      elsif doc['RESDATA']['COORD'] && doc['RESDATA']['COORD']['COORDTYPE']
+        return [] if doc['RESDATA']['COORD']['X'] == ''
+        return doc['RESDATA']
       else
         []
       end

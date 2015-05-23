@@ -70,6 +70,13 @@ class OllehTest < GeocoderTestCase
     assert result.address == "서울특별시 강남구 삼성동 74-14"
   end
 
+  def test_converting_coordinate
+    query = Geocoder::Query.new([960713, 1946274],{coord_in: 'wgs84', coord_out: 'utmk'})
+    lookup = Geocoder::Lookup::Olleh.new
+    result = lookup.search(query).first
+    assert result.converted_coordinates == ["127.05543973133743", "37.51491635059331"]
+  end
+
   def test_olleh_route_searching
     query = Geocoder::Query.new(
       "", {
