@@ -1,12 +1,10 @@
 language: ruby
 rvm:
-  - 2.2.2
-
-script: 'bundle exec rake'
-
-notifications:
-  email:
-    recipients:
-      - ping@jaigouk.kim
-    on_failure: change
-    on_success: never
+  - 1.9.3
+  - 2.0.0
+  - 2.1.2
+  - 2.2.0
+  - jruby-19mode
+  - rbx-2
+gemfile:
+  - Gemfile

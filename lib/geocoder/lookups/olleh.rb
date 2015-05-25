@@ -1,5 +1,5 @@
-require 'geocoder'
-require_relative "../../olleh"
+require 'geocoder/lookups/base'
+require "geocoder/results/olleh"
 require 'base64'
 require 'uri'
 require 'json'
@@ -59,20 +59,12 @@ module Geocoder::Lookup
       'utmk'      => 7
     }
 
-    def initialize
-      super
-      Geocoder.configure(
-        :use_https => true,
-        :http_headers => {"Authorization" => "Basic #{token}"}
-      )
+    def use_ssl?
+      true
     end
 
     def name
       "Olleh"
-    end
-
-    def required_api_key_parts
-      ["app_id", "app_key"]
     end
 
     def query_url(query)
@@ -154,17 +146,6 @@ module Geocoder::Lookup
       end
     end
 
-    def make_api_request(query)
-      timeout(configuration.timeout) do
-        uri = URI.parse(query_url(query))
-        Geocoder.log(:debug, "Geocoder: HTTP request being made for #{uri.to_s}")
-        http_client.start(uri.host, uri.port, :use_ssl => true) do |client|
-          req = Net::HTTP::Get.new(uri.request_uri, configuration.http_headers)
-          client.request(req)
-        end
-      end
-    end
-
     def base_url(query)
       case Olleh.check_query_type(query)
       when "route_search"
@@ -237,14 +218,6 @@ module Geocoder::Lookup
           addrcdtype: Olleh.addrcdtype[query.options[:addrcdtype]],
           timestamp: now
         })
-      end
-    end
-
-    def token
-      if a = configuration.api_key
-        if a.is_a?(Array)
-          return  Base64.encode64("#{a.first}:#{a.last}").strip
-        end
       end
     end
 
