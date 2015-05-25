@@ -4,17 +4,12 @@ require 'test_helper'
 class OllehTest < GeocoderTestCase
 
   def setup
-    Geocoder.configure(lookup: :olleh, :api_key => ['OllehMapAPI0100', 'bncT89dfRT'])
-  end
-
-  def test_olleh_api_key
-    g = Geocoder::Lookup::Olleh.new
-    assert_match 'T2xsZWhNYXBBUEkwMTAwOmJuY1Q4OWRmUlQ=', g.auth_key
-  end
-
-  def test_request_header_for_geocode
-    lookup = Geocoder::Lookup::Olleh.new
-    assert Geocoder.config.http_headers['Authorization'] == 'Basic T2xsZWhNYXBBUEkwMTAwOmJuY1Q4OWRmUlQ='
+    Geocoder.configure(lookup: :olleh, olleh: {
+      basic_auth: {
+        user: 'OllehMapAPI0100',
+        password: 'bncT89dfRT'
+      }
+    })
   end
 
   def test_query_for_geocode

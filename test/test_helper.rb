@@ -24,13 +24,6 @@ module Geocoder
         MockHttpResponse.new(body: s, code: "200")
       end
 
-      ##
-      # Fixture to use if none match the given query.
-      #
-      def default_fixture_filename
-        "#{fixture_prefix}_madison_square_garden"
-      end
-
       def fixture_prefix
         handle
       end
@@ -40,39 +33,18 @@ module Geocoder
         filename = "#{fixture_prefix}_#{label}"
         fixture_exists?(filename) ? filename : default_fixture_filename
       end
-
-      remove_method(:make_api_request)
-
-      def make_api_request(query)
-        return raise TimeoutError if query.text == "timeout"
-        return raise SocketError if query.text == "socket_error"
-        return raise Errno::ECONNREFUSED if query.text == "connection_refused"
-        if query.text == "invalid_json"
-          return MockHttpResponse.new(:body => 'invalid json', :code => 200)
-        end
-        read_fixture fixture_for_query(query)
-      end
     end
-
 
     class Olleh
       private
-      def fixture_prefix
-        "olleh"
-      end
+
       def default_fixture_filename
         "olleh_seoul"
       end
+
       remove_method(:make_api_request)
 
       def make_api_request(query)
-        return raise TimeoutError if query.text == "timeout"
-        return raise SocketError if query.text == "socket_error"
-        return raise Errno::ECONNREFUSED if query.text == "connection_refused"
-        if query.text == "invalid_json"
-          return MockHttpResponse.new(:body => 'invalid json', :code => 200)
-        end
-
         if query.text.include? "삼성동"
           read_fixture "olleh_seoul"
         elsif query.text.include? "960713"
@@ -94,38 +66,6 @@ module Geocoder
 end
 
 class GeocoderTestCase < Test::Unit::TestCase
-
-  def setup
-    super
-    Geocoder::Configuration.instance.set_defaults
-    Geocoder.configure(
-      :maxmind => {:service => :city_isp_org},
-      :maxmind_geoip2 => {:service => :insights, :basic_auth => {:user => "user", :password => "password"}})
-  end
-
-  def geocoded_object_params(abbrev)
-    {
-      :msg => ["Madison Square Garden", "4 Penn Plaza, New York, NY"]
-    }[abbrev]
-  end
-
-  def reverse_geocoded_object_params(abbrev)
-    {
-      :msg => ["Madison Square Garden", 40.750354, -73.993371]
-    }[abbrev]
-  end
-
-  def set_api_key!(lookup_name)
-    lookup = Geocoder::Lookup.get(lookup_name)
-    if lookup.required_api_key_parts.size == 1
-      key = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
-    elsif lookup.required_api_key_parts.size > 1
-      key = lookup.required_api_key_parts
-    else
-      key = nil
-    end
-    Geocoder.configure(:api_key => key)
-  end
 end
 
 class MockHttpResponse

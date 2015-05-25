@@ -49,20 +49,12 @@ module Geocoder::Lookup
       'bessel'  => 8
     }
 
-    def initialize
-      super
-      Geocoder.configure(
-        :use_https => true,
-        :http_headers => {"Authorization" => "Basic #{token}"}
-      )
+    def use_ssl?
+      true
     end
 
     def name
       "Olleh"
-    end
-
-    def required_api_key_parts
-      ["app_id", "app_key"]
     end
 
     def query_url(query)
@@ -87,10 +79,6 @@ module Geocoder::Lookup
 
     def self.coord_types
       COORD_TYPES
-    end
-
-    def auth_key
-      token
     end
 
     def self.check_query_type(query)
@@ -220,18 +208,9 @@ module Geocoder::Lookup
       end
     end
 
-    def token
-      if a = configuration.api_key
-        if a.is_a?(Array)
-          return  Base64.encode64("#{a.first}:#{a.last}").strip
-        end
-      end
-    end
-
     def now
       Time.now.strftime("%Y%m%d%H%M%S%L")
     end
-
 
     def url_query_string(query)
       URI.encode(
