@@ -167,22 +167,21 @@ module Geocoder::Lookup
     def query_url_params(query)
       case Olleh.check_query_type(query)
       when "route_search"
-        JSON.generate({
+        hash = {
           SX: query.options[:start_x],
           SY: query.options[:start_y],
           EX: query.options[:end_x],
           EY: query.options[:end_y],
-          VX1: query.options[:vx1],
-          VY1: query.options[:vy1],
-          VX2: query.options[:vx2],
-          VY2: query.options[:vy2],
-          VX3: query.options[:vx3],
-          VY3: query.options[:vy3],
           RPTYPE: 0,
           COORDTYPE: Olleh.route_coord_types[query.options[:coord_type]] || 7,
           PRIORITY: Olleh.priority[query.options[:priority]],
           timestamp:  now
-       })
+       }
+       (1..3).each do |x|
+          s = [query.options["vx#{x}"], query.options["vy#{x}"]]
+          hash.merge!({ "VX#{x}": s[0], "VY#{x}": s[1]}) unless s[0].nil? && s[1].nil?
+        end
+        JSON.generate(hash)
       when "convert_coord"
         JSON.generate({
           x: query.text.first,
