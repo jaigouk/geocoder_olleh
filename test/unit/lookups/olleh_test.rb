@@ -107,6 +107,7 @@ class OllehTest < GeocoderTestCase
     })
     lookup = Geocoder::Lookup::Olleh.new
     result = lookup.search(query).first
+    assert lookup.query_url(query).include?("VX3") == true
     assert result.total_dist == "15714"
     assert result.total_time == "42.2"
   end

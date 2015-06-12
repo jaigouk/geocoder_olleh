@@ -178,9 +178,10 @@ module Geocoder::Lookup
           timestamp:  now
        }
        (1..3).each do |x|
-          s = [query.options["vx#{x}"], query.options["vy#{x}"]]
+          s = [query.options[:"vx#{x}"], query.options[:"vy#{x}"]]
           hash.merge!({ "VX#{x}": s[0], "VY#{x}": s[1]}) unless s[0].nil? && s[1].nil?
         end
+
         JSON.generate(hash)
       when "convert_coord"
         JSON.generate({
