@@ -131,16 +131,16 @@ module Geocoder::Lookup
       case Olleh.check_query_type(query)
       when "geocoding" || "reverse_geocoding"
         return [] if doc['RESDATA']['COUNT'] == 0
-        return doc['RESDATA']["ADDRS"]
+        return doc['RESDATA']["ADDRS"] || []
       when "route_search"
         return [] if doc["RESDATA"]["SROUTE"]["isRoute"] == "false"
-        return doc["RESDATA"]
+        return doc["RESDATA"] || []
       when "convert_coord"
-        return doc['RESDATA']
+        return doc['RESDATA'] || []
       when "addr_step_search"
-        return doc['RESULTDATA']
+        return doc['RESULTDATA'] || []
       when "addr_nearest_position_search"
-        return doc['RESULTDATA']
+        return doc['RESULTDATA'] || []
       else
         []
       end
