@@ -101,7 +101,7 @@ module Geocoder::Result
       @data[1]['ROUTE']['total_dist']
     end
 
-    def rg_cound
+    def rg_count
       @data[1]['ROUTE']['rg_count']
     end
 
