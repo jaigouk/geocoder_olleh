@@ -110,18 +110,7 @@ module Geocoder::Result
     end
 
     ##
-    # methods for converting coord system
-    #
-    def coord_type
-      @data[1]['COORDTYPE']
-    end
-
-    def converted_coord
-      [@data[1]["X"], @data[1]["Y"]]
-    end
-
-    ##
-    # methods for parsing adress step search
+    # methods for parsing address step search
     #
     # 법정동 - 시도
     def addr_step_sido
